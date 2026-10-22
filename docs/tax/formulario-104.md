@@ -6,21 +6,12 @@
 local copy lives in `samples/`, outside the repository, because it
 contains real tax data.
 
-> **The form is the destination of the results, not a calculation source.**
-> taxap calculates with its own logic (`src/domain/`) from the vouchers and
-> what the user marks. Each result is presented next to the field where
-> the user must enter it:
->
-> ```
-> Purchases with the right to tax credit (gross value) — 500 = 1,000.00
-> ```
->
-> The admin uploads the form once and the system saves its complete field
-> catalog. When calculating, the system **relates each result to the
-> corresponding field**, approximately, by its meaning; the code knows
-> nothing about field codes ([ADR-015](../adr/015-definicion-del-formulario-desde-pdf.md)).
-> The formulas printed on the form are transcribed here as reference for
-> whoever implements the domain; the system never reads or executes them.
+> **Reference only.** taxap does not know this form's fields: it
+> calculates with its own logic (`src/domain/`) and shows results under
+> stable keys, never field codes
+> ([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)). The
+> field codes and formulas below are kept as reference for whoever
+> implements the domain; the system never reads, stores or executes them.
 > The values on the sample PDF are not used for anything.
 
 **The MVP covers only the monthly form, and only the basics of sales and
@@ -73,18 +64,12 @@ defined in the domain:
 | Column | gross · net · tax |
 | Fixed asset | no (the MVP doesn't distinguish them) |
 
-The system compares that description against the official names in the
-form's catalog and suggests the closest field
-([ADR-015](../adr/015-definicion-del-formulario-desde-pdf.md)). The
-relationship is an approximation: it's always shown with the field's
-official name and **the reason it was placed there**. Nobody corrects it
-by hand.
+The system does not relate these results to the form's fields
+([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)).
 
 **The "Field" columns in the tables below are not used by the system.**
-They are the field **expected** for each result in this version of the
-form, and they serve as a **test set for the matching logic**: if a rule
-change or a new form causes a result to no longer land where expected,
-the test catches it.
+They are only the field each result corresponds to in this version of the
+form, kept as reference for a person entering the values by hand.
 
 ### Sales — from `invoices_issued`
 

@@ -9,7 +9,7 @@ import { IvaCategoryEnum, SalesTreatmentEnum } from '@/domain/types';
 
 /**
  * Runs the domain calculation over the period's vouchers and saves the
- * results (ADR-015: the domain layer never knows about form fields).
+ * results under stable result keys.
  */
 export async function computePeriodResults(taxpayerId: string, periodId: string) {
   const userId = await getCurrentUserId();

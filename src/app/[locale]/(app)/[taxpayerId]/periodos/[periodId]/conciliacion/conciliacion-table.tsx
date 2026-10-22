@@ -30,7 +30,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { classifyPeriod, applyManualClassification } from './actions';
-import type { IvaCategory, ProcessingStatus } from '@prisma/client';
+import type { ClassificationSourceType, IvaCategory, ProcessingStatus } from '@prisma/client';
 
 interface PurchaseRow {
   id: string;
@@ -39,6 +39,7 @@ interface PurchaseRow {
   total: string;
   ivaCategory: IvaCategory;
   processingStatus: ProcessingStatus;
+  classificationSource: ClassificationSourceType | null;
   hasVat: boolean;
   issueDate: string;
   series: string;
@@ -46,6 +47,23 @@ interface PurchaseRow {
 }
 
 type Tab = 'UNCLASSIFIED' | 'CREDIT' | 'COST_EXPENSE' | 'NON_DEDUCTIBLE' | 'PENDING' | 'NO_VAT';
+
+// Who decided a voucher's category: the AI, the user (by hand), or a rule
+// the user's earlier manual decision created (ADR-006).
+const SOURCE_KEYS: Partial<Record<ClassificationSourceType, 'sourceAi' | 'sourceUser' | 'sourceRule' | 'sourceCatalog'>> = {
+  AI: 'sourceAi',
+  USER: 'sourceUser',
+  RULE: 'sourceRule',
+  CATALOG: 'sourceCatalog',
+};
+
+const TAB_HINT_KEYS: Record<Exclude<Tab, 'NO_VAT'>, 'tabUnclassifiedHint' | 'tabWithCreditHint' | 'tabCostExpenseHint' | 'tabNonDeductibleHint' | 'tabPendingHint'> = {
+  UNCLASSIFIED: 'tabUnclassifiedHint',
+  CREDIT: 'tabWithCreditHint',
+  COST_EXPENSE: 'tabCostExpenseHint',
+  NON_DEDUCTIBLE: 'tabNonDeductibleHint',
+  PENDING: 'tabPendingHint',
+};
 
 export function ConciliacionTable({
   purchases,
@@ -180,26 +198,30 @@ export function ConciliacionTable({
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button variant={tab === 'UNCLASSIFIED' ? 'default' : 'outline'} size="sm" onClick={() => setTab('UNCLASSIFIED')}>
+        <Button variant={tab === 'UNCLASSIFIED' ? 'default' : 'outline'} size="sm" title={t('tabUnclassifiedHint')} onClick={() => setTab('UNCLASSIFIED')}>
           {t('tabUnclassified')} ({unclassified.length})
         </Button>
-        <Button variant={tab === 'CREDIT' ? 'default' : 'outline'} size="sm" onClick={() => setTab('CREDIT')}>
+        <Button variant={tab === 'CREDIT' ? 'default' : 'outline'} size="sm" title={t('tabWithCreditHint')} onClick={() => setTab('CREDIT')}>
           {t('tabWithCredit')} ({withCredit.length})
         </Button>
-        <Button variant={tab === 'COST_EXPENSE' ? 'default' : 'outline'} size="sm" onClick={() => setTab('COST_EXPENSE')}>
+        <Button variant={tab === 'COST_EXPENSE' ? 'default' : 'outline'} size="sm" title={t('tabCostExpenseHint')} onClick={() => setTab('COST_EXPENSE')}>
           {t('tabCostExpense')} ({costExpense.length})
         </Button>
-        <Button variant={tab === 'NON_DEDUCTIBLE' ? 'default' : 'outline'} size="sm" onClick={() => setTab('NON_DEDUCTIBLE')}>
+        <Button variant={tab === 'NON_DEDUCTIBLE' ? 'default' : 'outline'} size="sm" title={t('tabNonDeductibleHint')} onClick={() => setTab('NON_DEDUCTIBLE')}>
           {t('tabNonDeductible')} ({nonDeductible.length})
         </Button>
-        <Button variant={tab === 'PENDING' ? 'default' : 'outline'} size="sm" onClick={() => setTab('PENDING')}>
+        <Button variant={tab === 'PENDING' ? 'default' : 'outline'} size="sm" title={t('tabPendingHint')} onClick={() => setTab('PENDING')}>
           {t('tabPending')} ({pending.length})
           {pending.length > 0 && <Badge variant="destructive" className="ml-1">•</Badge>}
         </Button>
-        <Button variant={tab === 'NO_VAT' ? 'default' : 'outline'} size="sm" onClick={() => setTab('NO_VAT')}>
+        <Button variant={tab === 'NO_VAT' ? 'default' : 'outline'} size="sm" title={t('noVatInfo')} onClick={() => setTab('NO_VAT')}>
           {t('tabNoVat')} ({noVat.length})
         </Button>
       </div>
+
+      {tab !== 'NO_VAT' && (
+        <p className="text-sm text-muted-foreground">{t(TAB_HINT_KEYS[tab])}</p>
+      )}
 
       {tab === 'NO_VAT' ? (
         <div className="space-y-3">
@@ -318,6 +340,15 @@ export function ConciliacionTable({
                             ? t('tabPending')
                             : t('tabUnclassified')}
                     </Badge>
+                    {p.classificationSource && SOURCE_KEYS[p.classificationSource] && p.ivaCategory !== 'UNCLASSIFIED' && (
+                      <Badge
+                        variant="outline"
+                        className="ml-1"
+                        title={t(`${SOURCE_KEYS[p.classificationSource]!}Hint`)}
+                      >
+                        {t(SOURCE_KEYS[p.classificationSource]!)}
+                      </Badge>
+                    )}
                     {p.aiNote && (
                       <Button
                         variant="ghost"

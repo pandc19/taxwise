@@ -61,7 +61,7 @@ export function calculatePeriodResults(
     (i) => i.ivaCategory === IvaCategoryEnum.COST_EXPENSE
   );
 
-  // Purchases with credit (500 - bruto, 510 - neto, 520 - impuesto)
+  // Purchases with credit (gross, net, tax)
   const purchasesWithCreditBruto = sumSubtotal(withCredit);
   const purchasesWithCreditVat = sumVat(withCredit);
 
@@ -71,7 +71,7 @@ export function calculatePeriodResults(
     componentIds: withCredit.map((i) => i.id),
   });
 
-  // Purchases without credit (502 - bruto, 512 - neto, 522 - impuesto)
+  // Purchases without credit (gross, net, tax)
   const purchasesNoCreditBruto = sumSubtotal(noCreditValue);
   const purchasesNoCreditVat = sumVat(noCreditValue);
 
@@ -81,7 +81,7 @@ export function calculatePeriodResults(
     componentIds: noCreditValue.map((i) => i.id),
   });
 
-  // Purchases with IVA = 0 (informativo, no casillero)
+  // Purchases with IVA = 0 (informational only)
   const purchasesZeroVat = received.filter(
     (i) => i.ivaCategory === IvaCategoryEnum.NOT_APPLICABLE
   );
@@ -107,7 +107,7 @@ export function calculatePeriodResults(
     componentIds: salesTaxed.map((i) => i.id),
   });
 
-  // Sales 0% without credit (403)
+  // Sales 0% without credit
   const salesZeroNoCredit = issued.filter(
     (i) => i.salesTreatment === SalesTreatmentEnum.ZERO_NO_CREDIT
   );
@@ -117,7 +117,7 @@ export function calculatePeriodResults(
     componentIds: salesZeroNoCredit.map((i) => i.id),
   });
 
-  // Sales 0% with credit (405)
+  // Sales 0% with credit
   const salesZeroWithCredit = issued.filter(
     (i) => i.salesTreatment === SalesTreatmentEnum.ZERO_WITH_CREDIT
   );
@@ -127,7 +127,7 @@ export function calculatePeriodResults(
     componentIds: salesZeroWithCredit.map((i) => i.id),
   });
 
-  // Export goods (407)
+  // Export goods
   const exportGoods = issued.filter(
     (i) => i.salesTreatment === SalesTreatmentEnum.EXPORT_GOODS
   );
@@ -137,7 +137,7 @@ export function calculatePeriodResults(
     componentIds: exportGoods.map((i) => i.id),
   });
 
-  // Export services (408)
+  // Export services
   const exportServices = issued.filter(
     (i) => i.salesTreatment === SalesTreatmentEnum.EXPORT_SERVICES
   );
@@ -147,7 +147,7 @@ export function calculatePeriodResults(
     componentIds: exportServices.map((i) => i.id),
   });
 
-  // Non object or exempt (431)
+  // Non object or exempt
   const nonObjectExempt = issued.filter(
     (i) => i.salesTreatment === SalesTreatmentEnum.NON_OBJECT_EXEMPT
   );

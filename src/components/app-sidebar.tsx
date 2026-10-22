@@ -64,7 +64,7 @@ export function AppSidebar({
         </Link>
         {isAdmin && (
           <Link
-            href="/admin/formularios"
+            href="/admin/tasas"
             className={navLinkClass(isAdminSection)}
             onClick={() => setMobileOpen(false)}
           >

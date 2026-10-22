@@ -23,8 +23,8 @@ Every access goes through the wrapper that sets `app.current_user_id`.
 `DECIMAL(14,2)` in PostgreSQL, `Prisma.Decimal` in TypeScript. No monetary
 operation in floating point.
 
-**4. Rates and fields are never hardcoded.**
-They are looked up by the date of the event. ([ADR-012](docs/adr/012-tasas-y-casilleros-como-datos-con-vigencia.md))
+**4. Rates are never hardcoded.**
+They are looked up by the date of the event. ([ADR-012](docs/adr/012-tasas-y-casilleros-como-datos-con-vigencia.md), rates part; the form-field part is superseded by ADR-016)
 
 **5. No value is derived that the source doesn't already provide.**
 `subtotal` and `vat_amount` are faithful copies from the file. Neither the
@@ -33,17 +33,14 @@ taxed base nor the 0% base is calculated. ([ADR-008](docs/adr/008-solo-totales-s
 **6. No classification change without an event in the audit log.**
 ([ADR-013](docs/adr/013-bitacora-inmutable-y-bloqueo-de-periodo.md))
 
-**7. Form 104 is the destination for results, not a source of calculation.**
-The system calculates with its own logic and the user copies the values into
-the SRI portal. Neither the values nor the formulas from the form's PDF feed
-anything; the formulas in [`formulario-104.md`](docs/tax/formulario-104.md) are
-reference material for whoever implements the domain.
-
-**The domain does not know field numbers.** It produces results with a stable
-key and a structured description (`SALES_TAXED`, `PURCHASES_WITH_CREDIT`…); the
-system relates them to the form's catalog by meaning and stores the
-relationship in `result_mappings`. Never write `401` or `500` in `src/domain/`.
-([ADR-015](docs/adr/015-definicion-del-formulario-desde-pdf.md))
+**7. The system does not know Form 104's fields.** The domain produces
+results under a stable key and a structured description (`SALES_TAXED`,
+`PURCHASES_WITH_CREDIT`…); where the user enters them in the SRI portal is
+their own step. Never write a field number (`401`, `500`…) in `src/`, and
+never read or execute a formula printed on the form. The formulas in
+[`formulario-104.md`](docs/tax/formulario-104.md) are reference material for
+whoever implements the domain.
+([ADR-016](docs/adr/016-resultados-sin-casilleros-del-formulario.md))
 
 **8. The MVP only covers the monthly form.** The semiannual one is a different form.
 
@@ -69,15 +66,9 @@ separate action. ([ADR-014](docs/adr/014-caracter-asistivo-y-disclaimers.md))
 | Sending the taxpayer's RUC or name to the AI | It never leaves the system ([ADR-007](docs/adr/007-modo-sin-ia-y-catalogo-compartido.md)) |
 | Assuming sales without IVA give a factor of zero | **No.** Exports and 0%-rated sales with credit entitlement add to the numerator: factor `1.0000` ([`formulario-104.md`](docs/tax/formulario-104.md)) |
 | Treating the factor as a single number without context | It depends on the destination of each sale with `IVA = 0`, which the file doesn't indicate |
-| Reading, storing, or executing a formula printed in the form's PDF | The form is a destination, not a source. The logic lives in `src/domain/`, written and tested ([ADR-015](docs/adr/015-definicion-del-formulario-desde-pdf.md)) |
 | Calculating the factor with unmarked `IVA = 0` sales | Blocked until the user marks the destination of each one |
-| Saving the form's PDF, its values, or its formulas | Only the field catalog is saved (code, name, section). The PDF carries personal data |
-| Having the admin assign or correct results | The admin is **of the system**, not of a taxpayer: they only import the form. Every relationship is explained; no one edits it by hand |
-| Showing a result with a field but no explanation | It's an approximation: always with the official name and the reason |
-| Blocking the calculation because a result has no field | It's shown without a code and flagged; it doesn't block |
-| Adding `attribution` (direct / proratable) | It was removed: a purchase's classification is 500 or 502 |
-| Splitting `IVA = 0` purchases across 507, 508, 531, 532 | They don't go to a field; just an informational total |
-| Treating a field missing from an import as deleted | It's "not observed"; it's only removed by an explicit action |
+| Adding `attribution` (direct / proratable) | It was removed: a purchase's classification is `CREDIT` or `COST_EXPENSE` |
+| Splitting `IVA = 0` purchases by destination | They're just an informational total |
 | Rewriting an ADR after changing one's mind | A new one is written that replaces it |
 | Enabling RLS with only `ENABLE ROW LEVEL SECURITY` | It's not enough if the app connects with the same role that owns the tables (the case here: `taxap` runs the migrations and serves the queries). Postgres exempts the owner from its own policies unless `FORCE ROW LEVEL SECURITY` is also set. Without it, the policies exist but silently filter nothing ([ADR-004](docs/adr/004-rls-por-usuario-con-prisma.md)) |
 

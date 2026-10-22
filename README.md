@@ -25,16 +25,15 @@ portal.
 3. **Reconciliation** — an inbox where the user approves, reassigns, or
    excludes whatever the system couldn't resolve with confidence. Each
    decision becomes a rule.
-4. **Pre-filing** — totals by Form 104 field, with a breakdown traceable
-   down to the individual invoice.
+4. **Pre-filing** — totals of sales and of purchases that can count toward
+   IVA credit, with a breakdown traceable down to the individual invoice.
 
 ## Status
 
 Functional MVP for monthly VAT (Form 104): registration, file ingestion,
 purchase classification, sales marking, result calculation, and period
 locking all work end to end against a real database. Still no taxpayer
-creation screen (the stopgap is `scripts/seed-test-taxpayer.ts`) nor form
-administration — see [`NEXT_STEPS.md`](NEXT_STEPS.md) for the exact status.
+creation screen (the stopgap is `scripts/seed-test-taxpayer.ts`) — see [`NEXT_STEPS.md`](NEXT_STEPS.md) for the exact status.
 
 Income Tax, Withholdings, and ATS are accounted for in the data model but
 are out of scope for the MVP.

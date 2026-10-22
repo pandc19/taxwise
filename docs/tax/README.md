@@ -5,15 +5,14 @@ from, and when they were verified**, so that a year from now it's
 possible to tell whether they're still in effect.
 
 This is not the regulation itself. It's the human-readable companion to
-the `tax_rates` table and the form-definition tables (`form_fields`),
-which are what the code actually queries
+the `tax_rates` table, which is what the code actually queries
 ([ADR-012](../adr/012-tasas-y-casilleros-como-datos-con-vigencia.md)).
 
 | Document | Content |
 |---|---|
 | [`formato-archivos-sri.md`](formato-archivos-sri.md) | Structure of the portal's `.txt` files. **Verified against real files.** |
 | [`tasas-iva.md`](tasas-iva.md) | History of rates with effective dates |
-| [`formulario-104.md`](formulario-104.md) | Field catalog. **Verified against a real form.** Includes open decisions. |
+| [`formulario-104.md`](formulario-104.md) | Reference only: what the form's fields mean and its formulas. **Verified against a real form.** The system does not use its field codes ([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)). |
 
 ## Rule for this directory
 

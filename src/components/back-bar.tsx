@@ -16,8 +16,8 @@ function parentPath(pathname: string): string | null {
   if (seg[0] === 'taxpayers') return seg.length === 1 ? null : '/taxpayers';
 
   if (seg[0] === 'admin') {
-    // /admin/formularios/{id} -> the list; the admin roots -> the app root.
-    return seg.length > 2 ? `/admin/${seg[1]}` : '/taxpayers';
+    // The admin screens are all roots -> the app root.
+    return '/taxpayers';
   }
 
   // /{taxpayerId}/editar | /periodos -> taxpayers

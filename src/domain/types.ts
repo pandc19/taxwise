@@ -7,7 +7,7 @@
 import Decimal from 'decimal.js';
 
 // ============================================================================
-// Tax Rates (ADR-012)
+// Tax Rates
 // ============================================================================
 
 export interface TaxRate {
@@ -50,8 +50,8 @@ export interface InvoiceIssued {
 // ============================================================================
 
 export enum IvaCategoryEnum {
-  CREDIT = 'CREDIT', // 500: with right to credit
-  COST_EXPENSE = 'COST_EXPENSE', // 502: no right to credit
+  CREDIT = 'CREDIT', // can count toward IVA credit
+  COST_EXPENSE = 'COST_EXPENSE', // business cost; its IVA gives no credit
   NOT_APPLICABLE = 'NOT_APPLICABLE', // IVA = 0
   UNCLASSIFIED = 'UNCLASSIFIED',
   NON_DEDUCTIBLE = 'NON_DEDUCTIBLE',
@@ -59,11 +59,11 @@ export enum IvaCategoryEnum {
 
 export enum SalesTreatmentEnum {
   TAXED = 'TAXED', // IVA > 0
-  ZERO_NO_CREDIT = 'ZERO_NO_CREDIT', // 403
-  ZERO_WITH_CREDIT = 'ZERO_WITH_CREDIT', // 405
-  EXPORT_GOODS = 'EXPORT_GOODS', // 407
-  EXPORT_SERVICES = 'EXPORT_SERVICES', // 408
-  NON_OBJECT_EXEMPT = 'NON_OBJECT_EXEMPT', // 431
+  ZERO_NO_CREDIT = 'ZERO_NO_CREDIT',
+  ZERO_WITH_CREDIT = 'ZERO_WITH_CREDIT',
+  EXPORT_GOODS = 'EXPORT_GOODS',
+  EXPORT_SERVICES = 'EXPORT_SERVICES',
+  NON_OBJECT_EXEMPT = 'NON_OBJECT_EXEMPT',
   UNCLASSIFIED = 'UNCLASSIFIED',
 }
 
@@ -85,7 +85,7 @@ export interface ActivityFingerprint {
 }
 
 // ============================================================================
-// Results (ADR-015: no casillero, pure domain)
+// Results (stable keys, pure domain)
 // ============================================================================
 
 export interface ResultKey {

@@ -1,5 +1,10 @@
 # ADR-012: Rates and fields as data with effective dates
 
+> **Superseded in full (2026-10-22):** the form-field half no longer
+> exists at all — see [ADR-016](016-resultados-sin-casilleros-del-formulario.md).
+> Only the rates part (`tax_rates`, lookup by the date of the event)
+> still stands.
+>
 > **Partially superseded (2026-09-20):** the single `form_casillero_map`
 > table described below is replaced by `form_versions`, `form_fields`, and
 > `result_mappings`: an administrator imports the form from a PDF, the

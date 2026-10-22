@@ -26,6 +26,7 @@ export default async function ConciliacionPage({
           total: p.total.toString(),
           ivaCategory: p.ivaCategory,
           processingStatus: p.processingStatus,
+          classificationSource: p.classificationSource,
           hasVat: p.vatAmount.gt(0),
           issueDate: p.issueDate.toISOString(),
           series: p.series,

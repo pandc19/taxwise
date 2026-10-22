@@ -68,9 +68,8 @@ the `<Link>` within the same `CardHeader`, never nested inside it (a
 `<button>` inside an `<a>` is invalid HTML and breaks keyboard focus).
 
 **Modals instead of inline forms** — creating a period
-(`periodos-client.tsx`), a form version and adding a field
-(`admin/formularios/...`), and loading a VAT rate (`admin/tasas/...`)
-all use `src/components/ui/dialog.tsx` (a wrapper around `radix-ui`'s
+(`periodos-client.tsx`) and loading a VAT rate (`admin/tasas/...`)
+both use `src/components/ui/dialog.tsx` (a wrapper around `radix-ui`'s
 `Dialog`, the first use of it in the project). Modal was chosen over a
 full page for short actions on a small form that don't need their own
 URL; creating/editing a taxpayer stays a full page because it has too
@@ -276,6 +275,13 @@ voucher as it was — unless the AI answered below 0.80, in which case the
 voucher goes back to Pendientes with the answer recorded (an AI failure or
 no-AI mode changes nothing). Every change logs an event with the old and new value.
 
+Each tab has a one-line description under the tab bar (and a `title`
+tooltip on the button), and every classified row shows who decided it:
+an **IA** / **Manual** / **Regla** / **Catálogo** badge from
+`invoices_received.classification_source`. A manual move sets the source to
+`USER`, so a voucher the AI classified and the user later changed shows
+**Manual**.
+
 The "Sin IVA (informativo)" tab lists vouchers with `IVA = 0`: read-only,
 no selection, they never enter the cascade.
 
@@ -358,9 +364,10 @@ behind a tab bar.
 domain logic, no aggregation SQL, tested without a database
 ([ADR-001](../adr/001-nextjs-monolito-con-capa-de-dominio.md)) — and
 saves each result to `period_results`. The domain produces **stable
-keys** (`SALES_TAXED`, `PURCHASES_WITH_CREDIT`, `PROPORTIONALITY_FACTOR`…)
-and knows nothing about form field codes
-([ADR-015](../adr/015-definicion-del-formulario-desde-pdf.md)).
+keys** (`SALES_TAXED`, `PURCHASES_WITH_CREDIT`, `PROPORTIONALITY_FACTOR`…).
+The system does not know Form 104's fields
+([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)); the
+screen shows these keys in plain language.
 
 The proportionality factor
 (`src/domain/iva/proportionality.ts`) counts exports and 0% sales with
@@ -370,12 +377,6 @@ services has a factor of `1.0000`
 blocked — with an explicit reason, never a made-up number — if there are
 unmarked sales or if there are no sales in the period (zero
 denominator).
-
-**The result → form field relationship (`result_mappings`,
-ADR-015) is not implemented yet:** the admin screen that imports the PDF
-and computes that relationship doesn't exist
-([`NEXT_STEPS.md`](../../NEXT_STEPS.md)). Today the screen shows the
-domain's keys directly, not the field code or its official name.
 
 **`lockPeriod()`** sets `tax_periods.status = FILED` and `locked_at`, and
 writes an event. A Postgres trigger
@@ -392,79 +393,32 @@ to exist before any button called it.
 
 ## 5. Administration
 
-**Routes:** `/[locale]/(app)/admin/formularios`,
-`/[locale]/(app)/admin/formularios/[formVersionId]`,
-`/[locale]/(app)/admin/tasas`
+**Route:** `/[locale]/(app)/admin/tasas`
 **Server Actions:** all in `admin/actions.ts`, all behind
 `requireAdmin()`, all running with `asAdmin()` — never `withUser()`,
-because the admin doesn't own any taxpayer ([ADR-015](../adr/015-definicion-del-formulario-desde-pdf.md)).
+because the admin doesn't own any taxpayer.
 
-The admin belongs to the system: they upload/publish the form and load
-rates, but don't see taxpayer data or intervene in results — the
-disclaimer in `admin/layout.tsx` says so explicitly on screen.
+The admin belongs to the system: they load verified VAT rates, and don't
+see taxpayer data or intervene in results — the disclaimer in
+`admin/layout.tsx` says so explicitly on screen. There is no form
+administration: the system doesn't know Form 104's fields
+([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)).
 
-- **`updateFormVersion()` / `updateFormField()` / `updateTaxRate()`**
-  back the pencil icons. The first two refuse a `PUBLISHED` version
-  (immutable; a correction is a new version). A rate's `(tax,
-  valid_from)` key isn't editable — delete and recreate.
-- **`deleteFormVersion()` / `deleteTaxRate()`** back the trash buttons on
-  the two admin lists (confirmation via `window.confirm`, like period
-  deletion). A form version is refused (`IN_USE`) while any
-  `tax_periods.form_version_id` points at it; deleting one removes its
-  fields and mappings by cascade. A rate is deleted by its
-  `(tax, valid_from)` key.
-- **`createFormVersionDraft()`** uploads a PDF, computes its `sha256`
-  (`crypto`, same as `uploadSourceFiles()` in ingestion) and creates a
-  `FormVersion` in `DRAFT`. **The PDF is never stored** — neither the
-  file nor its content, only the hash, exactly as ADR-015 requires.
-  It also tries to extract its fields with
-  `extractCandidateFields()` (`src/services/forms/pdf-field-extractor.ts`,
-  pure, no I/O — it receives the text already extracted by `pdf-parse`
-  as a string): a plain-text heuristic with no real position/layout data
-  behind it, so it gets the common case right (code + name +
-  gross/net/tax on a single line) and fails predictably on the rest
-  (wrapped lines, formulas printed in the cell itself like
-  "482-484"). Deliberately conservative about how much text behind it is
-  taken as the field's name (at most 2 lines) — not purely for
-  precision: the first lines of each page repeat the taxpayer's identity
-  (RUC, business name), and a longer search window pulled that straight
-  into `form_fields.label` in real tests against the sample PDF. A
-  scanned PDF with no text layer, or any read failure, leaves the draft
-  with no fields — never a hard error. All rows, whether generated or
-  not, stay editable and deletable on the next screen before publishing
-  (ADR-015: admin review is never optional, extraction quality doesn't
-  change that).
-- **`addFormField()`** adds a field (code, official name, section,
-  column type) by hand, one at a time, while the version is still
-  `DRAFT`. The schema itself (`@@unique([formVersionId, code])`) rejects
-  a repeated code — `addFormField` catches that Postgres error and
-  translates it to `DUPLICATE_CODE`; there's no application-level
-  duplicate check because the database already guarantees it.
-- **`publishFormVersion()`** requires at least one field and sets
-  `status = PUBLISHED` + `publishedAt`. Once published, a version isn't
-  edited — the UI stops showing the add/remove-field controls. Fixing
-  something means a new version, not an edit (the same principle as
-  ADRs: never rewritten, replaced).
 - **`createTaxRate()`** requires `source` and `verifiedAt` on the form
   itself — it can't be submitted without both (CLAUDE.md → "Normative
   values"). **No rate is loaded at all**: no row in
   [`docs/tax/tasas-iva.md`](../tax/tasas-iva.md) is verified yet, so
   `/admin/tasas` exists but its table stays empty in any real
   environment.
-- **`result_mappings` isn't computed anywhere yet** — the 4-level
-  cascade from ADR-015 (previous version → attributes → AI →
-  no field) is not implemented. Publishing a form leaves its
-  `form_fields` ready, but nothing connects them yet to the domain's
-  result keys (`NEXT_STEPS.md`).
+- **`updateTaxRate()` / `deleteTaxRate()`** back the pencil and trash
+  icons. A rate's `(tax, valid_from)` key isn't editable — delete and
+  recreate.
 
 ## Still to be built
 
 See [`NEXT_STEPS.md`](../../NEXT_STEPS.md) for the full list. The most
-relevant items for understanding the current state:
+relevant item for understanding the current state:
 
-- Automatic PDF extraction and computing `result_mappings`
-  (ADR-015) — without this, pre-filing still shows no field codes even
-  when a form has already been published.
 - Shared catalog (level 2) of the classification cascade — today
   `classifyPeriod()` passes it as an empty array; levels 1, 3, and 4 are
   active (level 3's `src/services/ai/`, since 2026-10-04).

@@ -5,7 +5,17 @@ Imperative mood: "Add", not "Added".
 
 ## [Unreleased]
 
+### Removed
+- Form 104 field matching (ADR-016, supersedes ADR-015): the admin form
+  import (`/admin/formularios`), the PDF field extractor and the
+  `pdf-parse` dependency; migration `drop_form_matching` drops
+  `form_versions`, `form_fields`, `result_mappings` and
+  `tax_periods.form_version_id`. Rates (`/admin/tasas`) stay.
+- Field numbers from comments in `src/domain/`
+
 ### Added
+- Reconciliation: a badge on each classified voucher says who decided it
+  (IA / Manual / Regla / Catálogo), and every tab has a description
 - Reconciliation: an info icon next to a voucher's classification opens the
   AI's confidence, model and explanation
 - `classification_events.ai_confidence` and `ai_reasoning` (migration

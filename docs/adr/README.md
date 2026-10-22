@@ -20,7 +20,8 @@ the point.
 | [009](009-clave-de-acceso-como-clave-de-deduplicacion.md) | Access key as the deduplication key | Accepted |
 | [010](010-tratamiento-por-tipo-de-comprobante.md) | Voucher-type allowlist | Accepted |
 | [011](011-ingesta-y-clasificacion-en-dos-pasos.md) | Resumable two-step ingestion and classification | Accepted |
-| [012](012-tasas-y-casilleros-como-datos-con-vigencia.md) | Rates and fields as data with effective dates | Accepted |
+| [012](012-tasas-y-casilleros-como-datos-con-vigencia.md) | Rates and fields as data with effective dates | Partially superseded by 016 (rates remain) |
 | [013](013-bitacora-inmutable-y-bloqueo-de-periodo.md) | Immutable audit log and period lock | Accepted |
 | [014](014-caracter-asistivo-y-disclaimers.md) | The system's assistive character | Accepted |
-| [015](015-definicion-del-formulario-desde-pdf.md) | Form definition imported from PDF | Accepted |
+| [015](015-definicion-del-formulario-desde-pdf.md) | Form definition imported from PDF | Superseded by 016 |
+| [016](016-resultados-sin-casilleros-del-formulario.md) | Results are not mapped to Form 104 fields | Accepted |

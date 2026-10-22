@@ -2,13 +2,12 @@
  * Proportionality Factor (Factor de Proporcionalidad).
  * Controls how much purchase VAT can be credited based on the composition of sales.
  *
- * Formula: (411+412+420+435+415+416+417+418) / 419
- * where:
- *  411, 412, 420, 435 = different VAT rates, count in numerator
- *  415, 416 = 0% sales WITH credit right, count in numerator
- *  417, 418 = exports (goods, services), count in numerator
- *  419 = total sales (denominator)
- *  403, 404, 431 = 0% without credit, no object/exempt, do NOT count in numerator
+ * Formula: sales that give a right to credit / total sales, where
+ *  - sales at any non-zero rate, 0% sales WITH credit right, and exports
+ *    (goods and services) count in the numerator;
+ *  - 0% sales without credit, and non-object/exempt sales, do NOT count in
+ *    the numerator;
+ *  - total sales is the denominator.
  *
  * Business logic:
  * - Factor is 1.0000 if all sales give credit right (including exports)

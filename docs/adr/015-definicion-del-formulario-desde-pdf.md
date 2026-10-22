@@ -1,7 +1,7 @@
 # ADR-015: The system knows the form and relates each result to its field
 
 ## Status
-Accepted
+Superseded by [ADR-016](016-resultados-sin-casilleros-del-formulario.md)
 
 ## Date
 2026-09-20

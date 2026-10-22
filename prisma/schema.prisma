@@ -33,7 +33,6 @@ model User {
   userTaxpayers        UserTaxpayer[]
   classificationEvents ClassificationEvent[]
   sourceFiles          SourceFile[]
-  formVersionsImported FormVersion[]
   aiUsage              AiUsage[]
   taxpayersCreated     Taxpayer[]
   taxRatesLoaded       TaxRate[]
@@ -137,7 +136,6 @@ model TaxPeriod {
   periodEnd             DateTime     @map("period_end") @db.Date
   periodicity           Periodicity  @default(MONTHLY)
   status                PeriodStatus @default(DRAFT)
-  formVersionId         String?      @map("form_version_id") @db.Uuid
   proportionalityFactor Decimal?     @map("proportionality_factor") @db.Decimal(5, 4)
   factorInputs          Json?        @map("factor_inputs")
   filedAt               DateTime?    @map("filed_at")
@@ -145,8 +143,7 @@ model TaxPeriod {
   createdAt             DateTime     @default(now()) @map("created_at")
   updatedAt             DateTime     @updatedAt @map("updated_at")
 
-  taxpayer    Taxpayer     @relation(fields: [taxpayerId], references: [id], onDelete: Cascade)
-  formVersion FormVersion? @relation(fields: [formVersionId], references: [id])
+  taxpayer Taxpayer @relation(fields: [taxpayerId], references: [id], onDelete: Cascade)
 
   invoicesReceived     InvoiceReceived[]
   invoicesIssued       InvoiceIssued[]
@@ -425,91 +422,7 @@ enum TaxRateType {
   IVA
 }
 
-// ============================================================================
-// Form and its relation to results (ADR-015)
-// ============================================================================
-
-model FormVersion {
-  id           String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  formCode     String     @map("form_code") // "104"; the MVP only supports the monthly one
-  label        String
-  validFrom    DateTime   @map("valid_from") @db.Date
-  validTo      DateTime?  @map("valid_to") @db.Date
-  status       FormStatus @default(DRAFT)
-  sourceSha256 String?    @map("source_sha256") // hash of the PDF; the file itself is never stored
-  importedBy   String?    @map("imported_by") @db.Uuid
-  importedAt   DateTime?  @map("imported_at")
-  publishedAt  DateTime?  @map("published_at")
-
-  importer       User?           @relation(fields: [importedBy], references: [id])
-  formFields     FormField[]
-  resultMappings ResultMapping[]
-  taxPeriods     TaxPeriod[]
-
-  @@unique([formCode, validFrom])
-  @@index([status])
-  @@map("form_versions")
-}
-
-enum FormStatus {
-  DRAFT
-  PUBLISHED
-}
-
-/// The form's complete catalog, exactly as it comes out of the PDF. No
-/// values, no formulas, no personal data.
-model FormField {
-  id            String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  formVersionId String     @map("form_version_id") @db.Uuid
-  code          String // "500", "563"...
-  label         String
-  section       String?
-  columnKind    ColumnKind @default(SINGLE) @map("column_kind")
-  displayOrder  Int        @map("display_order")
-  observed      Boolean    @default(true) // false if a later import didn't find it
-
-  formVersion    FormVersion     @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
-  resultMappings ResultMapping[]
-
-  @@unique([formVersionId, code])
-  @@index([formVersionId])
-  @@map("form_fields")
-}
-
-enum ColumnKind {
-  GROSS
-  NET
-  TAX
-  SINGLE
-}
-
-/// Which field receives each result, computed once per version and
-/// stored. Nobody edits these rows by hand.
-model ResultMapping {
-  formVersionId String        @map("form_version_id") @db.Uuid
-  resultKey     String        @map("result_key") // e.g. PURCHASES_WITH_CREDIT.GROSS
-  formFieldId   String?       @map("form_field_id") @db.Uuid
-  method        MappingMethod @default(ATTRIBUTES)
-  reason        String // explanation shown to the user
-  confidence    Decimal?      @db.Decimal(3, 2) // only when method = AI
-  createdAt     DateTime      @default(now()) @map("created_at")
-
-  formVersion FormVersion @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
-  formField   FormField?  @relation(fields: [formFieldId], references: [id], onDelete: SetNull)
-
-  @@id([formVersionId, resultKey])
-  @@unique([formVersionId, formFieldId])
-  @@map("result_mappings")
-}
-
-enum MappingMethod {
-  ATTRIBUTES
-  AI
-}
-
-/// What the domain layer computed. Knows nothing about form fields --
-/// the presentation layer joins this with the version's result_mappings
-/// saved on tax_periods.
+/// What the domain layer computed, keyed by stable result keys.
 model PeriodResult {
   taxPeriodId String   @map("tax_period_id") @db.Uuid
   resultKey   String   @map("result_key")

@@ -113,7 +113,6 @@ revalidation ([ADR-006](adr/006-reglas-por-proveedor-y-actividad-economica.md)).
 | `period_start`, `period_end` | DATE | |
 | `periodicity` | ENUM | `MONTHLY` \| `SEMIANNUAL` \| `ANNUAL`, default `MONTHLY` |
 | `status` | ENUM | `DRAFT` \| `UNDER_REVIEW` \| `FILED` |
-| `form_version_id` | UUID | FK, nullable — the form version the filing used |
 | `proportionality_factor` | DECIMAL(5,4) | nullable until calculated |
 | `factor_inputs` | JSONB | nullable |
 | `filed_at`, `locked_at` | TIMESTAMP | nullable |
@@ -297,66 +296,10 @@ admin screen (`/admin/tasas`) — before 2026-10-04 the
 schema had nowhere to record where a rate came from, even though the rule
 already existed in CLAUDE.md.
 
-### Form and relationship to results ([ADR-015](adr/015-definicion-del-formulario-desde-pdf.md))
+### Results ([ADR-016](adr/016-resultados-sin-casilleros-del-formulario.md))
 
-The form is the **destination** of the results, not a calculation source.
-No RLS (it isn't taxpayer data). The admin screen
-(`/admin/formularios`) has existed since 2026-10-04 — it **remains empty in
-production** until an admin uploads and publishes a real form.
-
-```
-form_versions ──< form_fields
-      └──────────< result_mappings ── (result key)
-```
-
-#### `form_versions`
-
-| Column | Type | Notes |
-|---|---|---|
-| `id` | UUID | PK |
-| `form_code` | TEXT | `"104"`; the MVP only supports the monthly form |
-| `label` | TEXT | |
-| `valid_from`, `valid_to` | DATE | set by the admin; `valid_to` nullable |
-| `status` | ENUM | `DRAFT` \| `PUBLISHED` |
-| `source_sha256` | TEXT | hash of the PDF; the file itself isn't stored, nullable |
-| `imported_by` | UUID | FK to `users` (ADMIN), nullable |
-| `imported_at`, `published_at` | TIMESTAMP | nullable |
-
-Unique `(form_code, valid_from)`.
-
-#### `form_fields`
-
-The full catalog of the form, exactly as it comes out of the PDF.
-
-| Column | Type | Notes |
-|---|---|---|
-| `id` | UUID | PK |
-| `form_version_id` | UUID | FK |
-| `code` | TEXT | `"500"`, `"563"`… unique per version |
-| `label` | TEXT | official name |
-| `section` | TEXT | nullable |
-| `column_kind` | ENUM | `GROSS` \| `NET` \| `TAX` \| `SINGLE`, default `SINGLE` |
-| `display_order` | INT | |
-| `observed` | BOOLEAN | default `true`; `false` if a later import didn't find it |
-
-Unique `(form_version_id, code)`. No values, no formulas, no personal
-data.
-
-#### `result_mappings`
-
-Composite PK `(form_version_id, result_key)`.
-
-| Column | Type | Notes |
-|---|---|---|
-| `form_version_id` | UUID | FK |
-| `result_key` | TEXT | e.g. `PURCHASES_WITH_CREDIT` |
-| `form_field_id` | UUID | FK, nullable |
-| `method` | ENUM | `ATTRIBUTES` \| `AI`, default `ATTRIBUTES` |
-| `reason` | TEXT | explanation shown to the user |
-| `confidence` | DECIMAL(3,2) | nullable; only when `method = AI` |
-| `created_at` | TIMESTAMP | |
-
-Unique `(form_version_id, form_field_id)`. Nobody edits these rows by hand.
+The system does not store or know Form 104's fields: results are kept
+under the domain's stable keys.
 
 #### `period_results`
 
@@ -369,9 +312,7 @@ Composite PK `(tax_period_id, result_key)`.
 | `value` | DECIMAL(14,4) | 4 decimal places because of the factor (`1.0000`) |
 | `computed_at` | TIMESTAMP | |
 
-What the domain calculated. It knows nothing about form fields — the
-presentation layer joins this with the `result_mappings` of the version
-saved on `tax_periods`.
+What the domain calculated, under stable keys. No form fields involved.
 
 ### `ai_usage`
 
@@ -395,7 +336,7 @@ implemented.
 `classification_events`, `period_results`.
 
 **No RLS** (they hold no taxpayer data): `users`, `plans`,
-`tax_rates`, `form_versions`, `form_fields`, `result_mappings`,
+`tax_rates`,
 `shared_supplier_catalog`, `ai_usage`.
 
 Every table with RLS has both `ENABLE ROW LEVEL SECURITY` and

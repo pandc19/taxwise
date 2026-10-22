@@ -7,7 +7,7 @@
  * `code` PK, and the admin account is looked up by `email` (@unique)
  * before deciding whether to create or just promote it.
  *
- * This does NOT include normative data (tax_rates, form_versions) -- those
+ * This does NOT include normative data (tax_rates) -- those
  * carry a source and verification date (CLAUDE.md -> "Normative values")
  * and are never loaded from memory. See docs/tax/tasas-iva.md: no rate is
  * verified yet, so there's nothing to seed there.
