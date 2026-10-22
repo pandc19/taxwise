@@ -17,7 +17,7 @@ import type {
 } from '@/domain/iva';
 import { VOUCHER_TYPE_WHITELIST } from '@/services/ingestion';
 import { parseAccessKey } from '@/domain/iva/access-key';
-import { getAiClassifier, PROFILE_PROMPT_VERSION, RELEVANCE_PROMPT_VERSION } from '@/services/ai';
+import { getAiClassifierFor, PROFILE_PROMPT_VERSION, RELEVANCE_PROMPT_VERSION } from '@/services/ai';
 import type { RelevanceResult } from '@/services/ai';
 import type { IvaCategory, ProcessingStatus, ClassificationSourceType, Relevance } from '@prisma/client';
 
@@ -140,7 +140,7 @@ export async function classifyPeriod(
   // supplier easily exceeds that): read, ask the AI, write.
 
   // Phase 1 -- read.
-  const { pending, taxpayer, rules, profiles, aiEnabled } = await withUser(userId, async (tx) => {
+  const { pending, taxpayer, rules, profiles } = await withUser(userId, async (tx) => {
     // Default: only what is still open. REQUIRES_MANUAL_REVIEW is what an
     // earlier engine run left unresolved (a manual decision makes it
     // PROCESSED), so re-running may now resolve it -- e.g. once an AI key
@@ -168,16 +168,12 @@ export async function classifyPeriod(
     });
     // Global table, no RLS: what each supplier is, whoever bought from it.
     const profiles = await tx.supplierProfile.findMany({ where: { supplierRuc: { in: suppliers } } });
-    const { aiEnabled } = await tx.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: { aiEnabled: true },
-    });
-    return { pending, taxpayer, rules, profiles, aiEnabled };
+    return { pending, taxpayer, rules, profiles };
   });
 
-  // No-AI mode (ADR-007) is a per-account setting, and also what a missing
-  // provider key means: either way the cascade falls through to review.
-  const aiClassifier = aiEnabled ? getAiClassifier() : null;
+  // The user's own AI (ADR-018). No key set up means no-AI mode (ADR-007):
+  // the cascade falls through to review.
+  const aiClassifier = await getAiClassifierFor(userId);
 
   const bySupplier = new Map<string, typeof pending>();
   for (const invoice of pending) {

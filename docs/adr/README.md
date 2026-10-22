@@ -15,7 +15,7 @@ the point.
 | [004](004-per-user-rls-with-prisma.md) | Row-Level Security per user with Prisma | Accepted |
 | [005](005-classification-cascade.md) | Four-level classification cascade | Partially superseded by 017 |
 | [006](006-rules-by-supplier-and-economic-activity.md) | Rules by supplier and economic activity | Partially superseded by 017 |
-| [007](007-no-ai-mode-and-shared-catalog.md) | No-AI mode and shared catalog | Accepted |
+| [007](007-no-ai-mode-and-shared-catalog.md) | No-AI mode and shared catalog | Partially superseded by 018 (the switch and the server key) |
 | [008](008-totals-only-no-line-items.md) | Totals only, no line-item detail | Accepted |
 | [009](009-access-key-as-deduplication-key.md) | Access key as the deduplication key | Accepted |
 | [010](010-treatment-by-voucher-type.md) | Voucher-type allowlist | Accepted |
@@ -26,3 +26,4 @@ the point.
 | [015](015-form-definition-from-pdf.md) | Form definition imported from PDF | Superseded by 016 |
 | [016](016-results-not-mapped-to-form-fields.md) | Results are not mapped to Form 104 fields | Accepted |
 | [017](017-supplier-knowledge-and-rules.md) | Supplier knowledge and rules | Accepted |
+| [018](018-ai-set-up-by-each-user.md) | AI is set up by each user | Accepted |

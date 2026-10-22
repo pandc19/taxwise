@@ -5,6 +5,8 @@ Accepted and implemented (2026-10-22). The open questions were settled with
 the defaults recorded below; the first one still needs an accountant's
 confirmation.
 
+> Note (2026-10-22): section 7 (`users.ai_enabled`) is replaced by [ADR-018](018-ai-set-up-by-each-user.md) — no key means no AI.
+
 ## Date
 2026-10-22
 

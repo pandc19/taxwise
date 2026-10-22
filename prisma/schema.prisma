@@ -19,15 +19,23 @@ generator client {
 // ============================================================================
 
 model User {
-  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  firstName    String?  @map("first_name")
-  lastName     String?  @map("last_name")
-  role         UserRole @default(INDIVIDUAL)
-  planCode     String   @default("STARTER") @map("plan_code")
-  aiEnabled    Boolean  @default(true) @map("ai_enabled")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id              String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  email           String   @unique
+  passwordHash    String   @map("password_hash")
+  firstName       String?  @map("first_name")
+  lastName        String?  @map("last_name")
+  role            UserRole @default(INDIVIDUAL)
+  planCode        String   @default("STARTER") @map("plan_code")
+  // The user's own AI (ADR-018): provider, key (encrypted, never returned), the
+  // last four characters of it, an Anthropic workspace id and a model. No key
+  // means no AI.
+  aiProvider      String?  @map("ai_provider")
+  aiKeyEncrypted  String?  @map("ai_key_encrypted")
+  aiKeyHint       String?  @map("ai_key_hint")
+  aiWorkspaceId   String?  @map("ai_workspace_id")
+  aiModel         String?  @map("ai_model")
+  aiSupplierModel String?  @map("ai_supplier_model")
+  createdAt       DateTime @default(now()) @map("created_at")
 
   plan                 Plan                  @relation(fields: [planCode], references: [code])
   userTaxpayers        UserTaxpayer[]

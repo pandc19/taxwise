@@ -1,5 +1,7 @@
 # ADR-007: No-AI mode and shared supplier catalog
 
+> **Partially superseded (2026-10-22) by [ADR-018](018-ai-set-up-by-each-user.md):** there is no `users.ai_enabled` switch and no server-wide key; each user sets up their own AI, and no key means no-AI mode. The rest stands.
+
 ## Status
 Accepted
 

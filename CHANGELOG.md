@@ -6,6 +6,24 @@ Imperative mood: "Add", not "Added".
 ## [Unreleased]
 
 ### Changed
+- AI models: Settings has two model fields — one that identifies suppliers
+  (default: the provider's strong model) and one model for the rest of the
+  AI's work, set for both its bulk and deep tiers (default: the provider's
+  pair). The deeper retry stays in the code but is switched off
+  (`DEEP_RETRY_ENABLED`); each field says which default it uses when empty;
+  `users.ai_supplier_model` added
+
+### Changed
+- AI is set up by each user (ADR-018): a new "Inteligencia artificial"
+  screen takes their provider, API key (stored encrypted), optional
+  Anthropic workspace and one model that answers everything. The server no
+  longer reads `AI_PROVIDER`, any API key, workspace or `*_MODEL` variable —
+  including `CLAUDE_PROFILE_MODEL` — from the environment; the only new
+  variable is `ENCRYPTION_SECRET`. `users.ai_enabled` is gone: no key means
+  no AI. Defaults when no model is chosen: Claude `haiku-5-5` / `opus-5-5`,
+  OpenAI `gpt-4o-mini` / `gpt-4o`
+
+### Changed
 - Routes, folders, files and components renamed to English:
   `periodos`→`periods`, `editar`→`edit`, `proveedores`→`suppliers`,
   `ingesta`→`ingestion`, `ventas`→`sales`, `conciliacion`→`reconciliation`,

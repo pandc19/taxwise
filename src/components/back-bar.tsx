@@ -15,6 +15,8 @@ function parentPath(pathname: string): string | null {
 
   if (seg[0] === 'taxpayers') return seg.length === 1 ? null : '/taxpayers';
 
+  if (seg[0] === 'settings') return '/taxpayers';
+
   if (seg[0] === 'admin') {
     // The admin screens are all roots -> the app root.
     return '/taxpayers';

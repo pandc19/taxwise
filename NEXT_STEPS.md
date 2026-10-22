@@ -39,8 +39,12 @@ opening to real users.
 - [ ] **Reclassifying a period that was marked as filed.** The database
       blocks changes to its vouchers; how the screen reports that has not
       been checked. Reopen the period first.
-- [ ] **Verify the default model ids.** `claude-opus-5` (the Claude
-      escalation and profile model) was never confirmed against the API.
+- [ ] **Rate limit on "save AI settings".** Verifying a key calls the
+      provider (free requests) and nothing stops repeated attempts
+      ([ADR-018](docs/adr/018-ai-set-up-by-each-user.md)).
+- [ ] **Confirm the default model ids** (`claude-haiku-5-5`,
+      `claude-opus-5-5`) against a real key; they come from the model list
+      of the tooling used to build this, not from a call.
 - [ ] **Spanish identifiers left on purpose:** the `es.json` namespaces and
       keys (`Conciliacion`, `Proveedores`, `PreDeclaracion`, `Admin.tasas*`)
       are not file names and were not renamed; the UI text is Spanish by

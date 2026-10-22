@@ -36,7 +36,12 @@ No RLS — this isn't taxpayer data.
 | `first_name`, `last_name` | TEXT | nullable |
 | `role` | ENUM | `INDIVIDUAL` \| `ACCOUNTANT` \| `ADMIN` |
 | `plan_code` | TEXT | FK to `plans.code`, default `STARTER` |
-| `ai_enabled` | BOOLEAN | default `true` |
+| `ai_provider` | TEXT | nullable — `claude` \| `openai`, the user's own AI ([ADR-018](adr/018-ai-set-up-by-each-user.md)) |
+| `ai_key_encrypted` | TEXT | nullable — the API key, AES-256-GCM; never returned. No key means no AI |
+| `ai_key_hint` | TEXT | nullable — its last four characters |
+| `ai_workspace_id` | TEXT | nullable — Anthropic workspace, only if the key needs one |
+| `ai_model` | TEXT | nullable — one model, set for both tiers (bulk and deep) of the AI's normal work; empty means the provider's default pair |
+| `ai_supplier_model` | TEXT | nullable — the model that identifies suppliers (asked once per RUC); empty means the provider's default (the strong one) |
 | `created_at` | TIMESTAMP | |
 
 ### `plans`

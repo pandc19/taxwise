@@ -34,6 +34,27 @@ yourself.
 
 ---
 
+## Turn on the AI (optional)
+
+Open "Inteligencia artificial" in the left menu.
+
+1. Choose where your key is from: **Anthropic (Claude)** or **OpenAI**.
+2. Paste your **API key**. It comes from your account with that provider;
+   they charge you for what is asked (the cost for a month of typical use is
+   small, since each supplier is asked about only once), taxap charges nothing.
+3. Optionally choose two **models**. One *recognises suppliers* (a strong
+   one works best, because it must know real companies; it is asked only
+   once per supplier). The other is used for *everything else the AI does*
+   (a cheaper one is fine). Under each field the screen tells you which
+   default is used if you leave it empty.
+4. Press "Guardar la clave". taxap first checks with the provider that the
+   key and the models work, using requests that cost nothing.
+
+The key is stored encrypted and is never shown again, only its last four
+characters. "Quitar la clave" removes it and turns the AI off.
+
+---
+
 ## 1. Create your taxpayer
 
 Go to "Mis contribuyentes" → "+ Nuevo contribuyente".
@@ -147,9 +168,9 @@ that sells the same things to businesses and households alike (hardware
 stores, general shops, fuel stations), is **never decided automatically**:
 it waits for you.
 
-If you don't want the AI at all, it can be turned off per account (there is
-no screen for that yet) or by leaving out the provider key; everything else
-still works and more invoices will wait for you.
+The AI is optional and it is **yours**: you add your own API key (see
+"Turn on the AI" below). Without one, everything else still works and more
+invoices will wait for you.
 
 ### The tabs
 

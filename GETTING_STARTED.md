@@ -75,28 +75,30 @@ openssl rand -base64 32
 DATABASE_URL="postgresql://taxap:taxap_dev_password@localhost:5432/taxap_dev?schema=public"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="<the secret generated above>"
-AI_PROVIDER="claude"
-ANTHROPIC_API_KEY=""
+ENCRYPTION_SECRET="<32 random bytes in base64, see below>"
 ```
 
-`AI_PROVIDER`/`ANTHROPIC_API_KEY` (or `OPENAI_API_KEY` if `AI_PROVIDER=openai`)
-are **optional**. Without a key for the selected provider (or with the
-account's AI switched off), the system runs in no-AI mode: the user's own
-rules and the match against what they say they buy for work still decide
-what they can, and everything else goes to the review inbox. Nothing
-breaks. See [ADR-007](docs/adr/007-no-ai-mode-and-shared-catalog.md) and
-[ADR-017](docs/adr/017-supplier-knowledge-and-rules.md). The two providers
-(`src/services/ai/`) implement the same `AiClassifier` interface, so
-switching one for the other is just `AI_PROVIDER` -- no code change.
+`ENCRYPTION_SECRET` is **optional** but needed for any AI: generate it with
+`openssl rand -base64 32`. The server holds **no AI key and reads no AI
+setting from the environment** ([ADR-018](docs/adr/018-ai-set-up-by-each-user.md)):
+each user opens "Inteligencia artificial" in the sidebar and enters their
+own provider (Anthropic or OpenAI), API key, and optionally two models. The key
+is stored encrypted with `ENCRYPTION_SECRET`; if that secret changes, saved
+keys become unreadable and users add theirs again.
 
-Which model answers is set by `*_BULK_MODEL`, `*_ESCALATION_MODEL` and
-`*_PROFILE_MODEL` (`CLAUDE_` or `OPENAI_` prefix). Knowing *who a supplier
-is* is world knowledge, asked once per RUC and shared by every taxpayer, so
-it uses the strong model by default; a small model confused a steel supplier
-with a computer shop.
+With no key set up the system runs in no-AI mode: the user's own rules and
+the match against what they say they buy for work still decide what they
+can, and everything else goes to the review inbox. Nothing breaks. See
+[ADR-007](docs/adr/007-no-ai-mode-and-shared-catalog.md) and
+[ADR-017](docs/adr/017-supplier-knowledge-and-rules.md).
 
-If the AI call fails with *"This API key is not scoped to a workspace"*, set
-`ANTHROPIC_WORKSPACE_ID` to your workspace id (or use a workspace-scoped key).
+There are two model settings (defaults in `src/services/ai/models.ts`, used
+when left empty): one to *identify a supplier* — world knowledge, asked once
+per RUC and shared by every taxpayer, so it defaults to a strong model (a
+small one confused a steel supplier with a computer shop) — and one model for
+*the rest of the AI's work*, which the code runs as a cheap "bulk" tier and a
+stronger "deep" tier (one chosen model is set for both). The deeper retry is
+switched off for now (`DEEP_RETRY_ENABLED`).
 
 ## 3. Dependencies and schema
 

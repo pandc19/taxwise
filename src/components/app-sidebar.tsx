@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from 'cn';
-import { Building2, Menu, ShieldCheck, X } from 'lucide-react';
+import { Building2, Menu, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { LogoutButton } from '@/components/logout-button';
 
@@ -11,6 +11,7 @@ interface AppSidebarProps {
   logoutLabel: string;
   taxpayersLabel: string;
   adminLabel: string;
+  settingsLabel: string;
   isAdmin: boolean;
   userEmail: string;
 }
@@ -20,13 +21,15 @@ export function AppSidebar({
   logoutLabel,
   taxpayersLabel,
   adminLabel,
+  settingsLabel,
   isAdmin,
   userEmail,
 }: AppSidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isTaxpayersSection = !pathname.startsWith('/admin');
+  const isSettingsSection = pathname.startsWith('/settings');
+  const isTaxpayersSection = !pathname.startsWith('/admin') && !isSettingsSection;
   const isAdminSection = pathname.startsWith('/admin');
 
   const navLinkClass = (active: boolean) =>
@@ -61,6 +64,14 @@ export function AppSidebar({
         >
           <Building2 className="size-4" />
           {taxpayersLabel}
+        </Link>
+        <Link
+          href="/settings/ai"
+          className={navLinkClass(isSettingsSection)}
+          onClick={() => setMobileOpen(false)}
+        >
+          <Sparkles className="size-4" />
+          {settingsLabel}
         </Link>
         {isAdmin && (
           <Link

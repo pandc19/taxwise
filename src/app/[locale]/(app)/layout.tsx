@@ -15,6 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         logoutLabel={t('logout')}
         taxpayersLabel={t('navTaxpayers')}
         adminLabel={t('navAdmin')}
+        settingsLabel={t('navSettings')}
         isAdmin={isAdmin}
         userEmail={session?.user?.email ?? ''}
       />

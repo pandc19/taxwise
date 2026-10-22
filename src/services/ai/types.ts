@@ -1,7 +1,7 @@
 /**
  * Provider-agnostic AI interface (ADR-017, ADR-005 level 4, ADR-007).
  * Every provider implementation (Claude, OpenAI, ...) returns these same
- * shapes, so `getAiClassifier()`'s caller never knows which one answered.
+ * shapes, so the caller of `getAiClassifierFor()` never knows which one answered.
  *
  * Two separate questions, asked at two different times:
  *  1. `profileSupplier` -- what is this supplier? Public data only (RUC and

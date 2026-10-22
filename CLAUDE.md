@@ -66,6 +66,7 @@ separate action. ([ADR-014](docs/adr/014-assistive-character-and-disclaimers.md)
 | Asking the AI to choose between credit and expense | It only says whether a supplier **relates to the taxpayer's work**; the category follows the taxpayer's own `purchase_treatment` ([ADR-017](docs/adr/017-supplier-knowledge-and-rules.md)) |
 | Creating a supplier rule from a manual decision | Manual = that voucher only. A rule exists only if the user asks for one, or as a remembered AI answer ([ADR-017](docs/adr/017-supplier-knowledge-and-rules.md)) |
 | Letting the AI decide a `mixed_use` supplier | Hardware stores, supermarkets, fuel… are sold to businesses and households alike: its vouchers go to review, or to the user's own rule |
+| Reading an AI key or model from the environment, or returning a saved key to the client | Keys are the user's, stored encrypted, shown only as their last four characters ([ADR-018](docs/adr/018-ai-set-up-by-each-user.md)) |
 | Sending the buyer's RUC or name to the AI | Only the supplier's RUC/name, and the buyer's activities and work profile |
 | Sending the taxpayer's RUC or name to the AI | It never leaves the system ([ADR-007](docs/adr/007-no-ai-mode-and-shared-catalog.md)) |
 | Assuming sales without IVA give a factor of zero | **No.** Exports and 0%-rated sales with credit entitlement add to the numerator: factor `1.0000` ([`vat-calculation.md`](docs/tax/vat-calculation.md)) |
@@ -80,10 +81,21 @@ separate action. ([ADR-014](docs/adr/014-assistive-character-and-disclaimers.md)
 
 ## AI models
 
-| Use | Model |
-|---|---|
-| Relevance of a supplier to a taxpayer (bulk) | `claude-haiku-4-5` |
-| Escalation of ambiguous cases, and **supplier profiles** (once per RUC, cached globally: knowing who a supplier is needs world knowledge) | `claude-opus-5` |
+The user chooses in Settings one model for the normal AI work (set for both
+tiers) and one for supplier profiles; what they leave empty falls back to these
+defaults (`src/services/ai/models.ts`). The deep retry exists in the code but
+is switched off (`DEEP_RETRY_ENABLED`).
+
+| Use | Claude | OpenAI |
+|---|---|---|
+| Bulk: relevance of a supplier to a taxpayer | `claude-haiku-5-5` | `gpt-4o-mini` |
+| Deep: the retry when bulk is not confident (off for now) | `claude-opus-5-5` | `gpt-4o` |
+| **Supplier profiles** (once per RUC, cached globally: knowing who a supplier is needs world knowledge) | `claude-opus-5-5` | `gpt-4o` |
+
+The AI is the **user's own**: provider, key and models are set in Settings and
+stored encrypted; the server holds no AI key and reads no AI setting from the
+environment ([ADR-018](docs/adr/018-ai-set-up-by-each-user.md)). No key means
+no AI.
 
 With structured outputs (`output_config.format`), never by parsing prose. Batch
 API for the bulk pass. Every response logs `model_id` and `prompt_version`.

@@ -52,7 +52,7 @@ are out of scope for the MVP.
 | VAT calculation | Pure domain in TypeScript/`Decimal.js` — no aggregation SQL |
 | Isolation | Row-Level Security per user |
 | Authentication | NextAuth v5 (credentials) + bcryptjs |
-| AI | Claude or OpenAI, chosen by `AI_PROVIDER`; structured output; optional (no-AI mode) |
+| AI | Claude or OpenAI with the user's own key, set in Settings; structured output; optional (no-AI mode) |
 
 Not implemented yet (see [`NEXT_STEPS.md`](NEXT_STEPS.md)): the Batch API
 pass for AI calls, observability (Sentry), and a deployment target.

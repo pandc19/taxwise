@@ -316,8 +316,7 @@ already computed — there's no separate second list of "standard types").
 separate questions (`src/services/ai/`):
 
 1. *What is this supplier?* — `profileSupplier()`: one call per RUC, to the
-   strong model (`OPENAI_PROFILE_MODEL` / `CLAUDE_PROFILE_MODEL`, default the
-   escalation model — it is world knowledge, asked once and shared), answer
+   the supplier model (it is world knowledge, asked once and shared), answer
    stored globally in `supplier_profiles` (kinds, a one-line summary, a
    `mixed_use` flag, confidence, model and prompt version). It carries only
    the supplier's RUC and name — no buyer information — and is repeated only
@@ -334,17 +333,18 @@ separate questions (`src/services/ai/`):
    (`computeWorkProfileHash()`); it never overwrites one of the user's own
    rules.
 
-`getAiClassifier()` (`src/services/ai/index.ts`) reads `AI_PROVIDER`
-(`claude` or `openai`, default `claude`) and returns `null` if that
-provider's key isn't set (or `users.ai_enabled` is off, checked by
-`classifyPeriod()`) — the no-AI mode of ADR-007. `ClaudeClassifier` and
-`OpenAiClassifier` (`src/services/ai/providers/`) implement the same
-`AiClassifier` interface: ask the bulk model first (`CLAUDE_BULK_MODEL`,
-default `claude-haiku-4-5` per CLAUDE.md's model table; `OPENAI_BULK_MODEL`,
-default `gpt-4o-mini`), and escalate to the stronger model
-(`CLAUDE_ESCALATION_MODEL`/`OPENAI_ESCALATION_MODEL`, defaults
-`claude-opus-5`/`gpt-4o`) when confidence is below 0.80 — the cascade's own
-acceptance bar. Both use structured output (Zod schema via each SDK's own
+`getAiClassifierFor(userId)` (`src/services/ai/user-provider.ts`) builds the
+classifier from the **user's own settings** (provider, decrypted key,
+workspace, model — see Settings below) and returns `null` when there is no
+key: that is the no-AI mode of ADR-007 ([ADR-018](../adr/018-ai-set-up-by-each-user.md)).
+`ClaudeClassifier` and `OpenAiClassifier` (`src/services/ai/providers/`)
+implement the same `AiClassifier` interface. `modelsFor()` gives a *bulk*
+and a *deep* model for the normal work (the one model the user chose in
+`users.ai_model` fills both; none chosen means the provider's pair) and a
+separate *supplier* model (`users.ai_supplier_model`, default the provider's
+strong one). Relevance is asked of the bulk model; the retry on the deep one
+when confidence is below 0.80 exists in the providers but is switched off
+(`DEEP_RETRY_ENABLED` in `models.ts`). Both use structured output (Zod schema via each SDK's own
 helper), never prose parsing. A `classification_events` row for a supplier
 the AI was consulted about records `model_id`, `prompt_version`,
 `ai_confidence` and `ai_reasoning` (also when the answer was below 0.80 and
@@ -465,6 +465,22 @@ administration: the system doesn't know Form 104's fields
 - **`updateTaxRate()` / `deleteTaxRate()`** back the pencil and trash
   icons. A rate's `(tax, valid_from)` key isn't editable — delete and
   recreate.
+
+## 6. Settings (AI)
+
+**Route:** `/[locale]/(app)/settings/ai` (sidebar: "Inteligencia artificial")
+**Server Actions:** `getAiSettings()`, `saveAiSettings()`,
+`removeAiSettings()` (`settings/ai/actions.ts`)
+
+The user picks Anthropic or OpenAI, enters their API key, optionally an
+Anthropic workspace id and one model for the normal AI work (both tiers) and one for identifying suppliers. `saveAiSettings()` validates the shapes,
+then **checks them with the provider using free requests** (list models,
+retrieve each chosen model — `verifyAiSettings()`), then stores the key encrypted
+(`src/lib/secret-box.ts`, AES-256-GCM, `ENCRYPTION_SECRET`, user id as
+authenticated data). The key is never returned: the screen shows the provider
+and the last four characters. Leaving the key empty keeps the saved one when
+the provider hasn't changed. Without `ENCRYPTION_SECRET` the form says saving
+isn't available. Removing the key switches the AI off.
 
 ## Still to be built
 
