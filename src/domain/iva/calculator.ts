@@ -71,6 +71,12 @@ export function calculatePeriodResults(
     componentIds: withCredit.map((i) => i.id),
   });
 
+  results.set('PURCHASES_WITH_CREDIT_VAT', {
+    key: 'PURCHASES_WITH_CREDIT_VAT',
+    value: purchasesWithCreditVat,
+    componentIds: withCredit.map((i) => i.id),
+  });
+
   // Purchases without credit (gross, net, tax)
   const purchasesNoCreditBruto = sumSubtotal(noCreditValue);
   const purchasesNoCreditVat = sumVat(noCreditValue);
@@ -78,6 +84,12 @@ export function calculatePeriodResults(
   results.set('PURCHASES_NO_CREDIT', {
     key: 'PURCHASES_NO_CREDIT',
     value: purchasesNoCreditBruto,
+    componentIds: noCreditValue.map((i) => i.id),
+  });
+
+  results.set('PURCHASES_NO_CREDIT_VAT', {
+    key: 'PURCHASES_NO_CREDIT_VAT',
+    value: purchasesNoCreditVat,
     componentIds: noCreditValue.map((i) => i.id),
   });
 
@@ -104,6 +116,12 @@ export function calculatePeriodResults(
   results.set('SALES_TAXED', {
     key: 'SALES_TAXED',
     value: sumSubtotal(salesTaxed),
+    componentIds: salesTaxed.map((i) => i.id),
+  });
+
+  results.set('SALES_TAXED_VAT', {
+    key: 'SALES_TAXED_VAT',
+    value: sumVat(salesTaxed),
     componentIds: salesTaxed.map((i) => i.id),
   });
 
@@ -179,8 +197,10 @@ export function calculatePeriodResults(
       },
     });
 
-    // Credited VAT = total purchase VAT * factor
-    const totalPurchaseVat = purchasesWithCreditVat.plus(purchasesNoCreditVat);
+    // Credited VAT = VAT of the purchases WITH the right to credit * factor.
+    // Purchases without that right (cost or expense) never enter: their IVA
+    // is not credit at any factor (docs/tax/formulario-104.md).
+    const totalPurchaseVat = purchasesWithCreditVat;
     const creditedVat = totalPurchaseVat
       .times(factorCalc.factor)
       .toDecimalPlaces(2, Decimal.ROUND_HALF_UP);

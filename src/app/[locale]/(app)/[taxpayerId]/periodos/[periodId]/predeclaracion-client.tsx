@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,17 @@ export function PreDeclaracionClient({
   const common = useTranslations('Common');
   const [isPending, startTransition] = useTransition();
 
+  // First visit: nothing has been calculated yet, so do it instead of
+  // showing an empty screen that looks like there is no data.
+  useEffect(() => {
+    if (initialResults.length === 0 && !isFiled) {
+      startTransition(async () => {
+        await computePeriodResults(taxpayerId, periodId);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function recompute() {
     startTransition(async () => {
       await computePeriodResults(taxpayerId, periodId);
@@ -49,13 +60,20 @@ export function PreDeclaracionClient({
 
   const salesKeys = [
     'SALES_TAXED',
+    'SALES_TAXED_VAT',
     'SALES_ZERO_NO_CREDIT',
     'SALES_ZERO_WITH_CREDIT',
     'EXPORT_GOODS',
     'EXPORT_SERVICES',
     'SALES_NON_OBJECT_EXEMPT',
   ];
-  const purchaseKeys = ['PURCHASES_WITH_CREDIT', 'PURCHASES_NO_CREDIT', 'PURCHASES_ZERO_VAT'];
+  const purchaseKeys = [
+    'PURCHASES_WITH_CREDIT',
+    'PURCHASES_WITH_CREDIT_VAT',
+    'PURCHASES_NO_CREDIT',
+    'PURCHASES_NO_CREDIT_VAT',
+    'PURCHASES_ZERO_VAT',
+  ];
   const factorKeys = ['PROPORTIONALITY_FACTOR', 'CREDIT_APPLICABLE', 'VAT_NOT_CREDITED'];
 
   const byKey = new Map(initialResults.map((r) => [r.key, r.value]));
@@ -67,7 +85,7 @@ export function PreDeclaracionClient({
           {isFiled ? t('formLabel') : t('draftBadge')}
         </Badge>
         <Button onClick={recompute} disabled={isPending || isFiled} size="sm" variant="outline">
-          {common('save')}
+          {isPending ? t('recalculating') : t('recalculate')}
         </Button>
       </div>
 
@@ -83,7 +101,7 @@ export function PreDeclaracionClient({
           {salesKeys.map((key) =>
             byKey.has(key) ? (
               <div key={key} className="flex justify-between text-sm">
-                <span>{key}</span>
+                <span>{t(`results.${key}`)}</span>
                 <strong>{byKey.get(key)}</strong>
               </div>
             ) : null
@@ -99,7 +117,7 @@ export function PreDeclaracionClient({
           {purchaseKeys.map((key) =>
             byKey.has(key) ? (
               <div key={key} className="flex justify-between text-sm">
-                <span>{key}</span>
+                <span>{t(`results.${key}`)}</span>
                 <strong>{byKey.get(key)}</strong>
               </div>
             ) : null
@@ -116,7 +134,7 @@ export function PreDeclaracionClient({
             factorKeys.map((key) =>
               byKey.has(key) ? (
                 <div key={key} className="flex justify-between text-sm">
-                  <span>{key}</span>
+                  <span>{t(`results.${key}`)}</span>
                   <strong>{byKey.get(key)}</strong>
                 </div>
               ) : null

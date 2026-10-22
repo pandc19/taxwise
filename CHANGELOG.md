@@ -16,6 +16,12 @@ Imperative mood: "Add", not "Added".
   change
 
 ### Fixed
+- "Crédito tributario aplicable" added the IVA of cost-or-expense purchases
+  to the credit base; it now uses only purchases with a right to credit, as
+  the form's formula does. With `DEDUCT_AS_EXPENSE` the credit is correctly 0
+- Pre-declaration now shows the IVA amount of purchases (with and without
+  credit) and of taxed sales, not only the bases; and calculates by itself
+  the first time it is opened
 - Reclassifying now withdraws an earlier engine result when the supplier is
   now known to need the user (mixed-use, or one the AI doesn't recognise),
   and drops a remembered AI answer that a new run could not renew; the info

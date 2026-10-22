@@ -412,6 +412,12 @@ keys** (`SALES_TAXED`, `PURCHASES_WITH_CREDIT`, `PROPORTIONALITY_FACTOR`…).
 The system does not know Form 104's fields
 ([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)); the
 screen shows these keys in plain language.
+Each purchase and taxed-sale result comes as a base and an IVA amount
+(`PURCHASES_WITH_CREDIT` / `…_VAT`, `PURCHASES_NO_CREDIT` / `…_VAT`,
+`SALES_TAXED` / `…_VAT`). The applicable credit is the IVA of purchases
+**with** a right to credit times the factor; the IVA of cost-or-expense
+purchases never counts as credit. The screen calculates by itself the first
+time a period is opened, and "Recalcular" refreshes it after any change.
 
 The proportionality factor
 (`src/domain/iva/proportionality.ts`) counts exports and 0% sales with
