@@ -32,7 +32,7 @@ export interface CreateTaxRateResult {
 /**
  * Never called with an unverified value -- the screen won't submit the
  * form without `source`/`verifiedAt` (CLAUDE.md -> "Normative values").
- * No data is seeded: no rate in docs/tax/tasas-iva.md is verified yet.
+ * No data is seeded: no rate in docs/tax/vat-rates.md is verified yet.
  */
 export async function createTaxRate(input: CreateTaxRateInput): Promise<CreateTaxRateResult> {
   const userId = await requireAdmin();
@@ -51,7 +51,7 @@ export async function createTaxRate(input: CreateTaxRateInput): Promise<CreateTa
         },
       })
     );
-    revalidatePath('/admin/tasas');
+    revalidatePath('/admin/rates');
     return { success: true };
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes('Unique constraint')) {
@@ -75,7 +75,7 @@ export async function deleteTaxRate(tax: TaxRateType, validFrom: string): Promis
   } catch {
     return { success: false, error: 'UNKNOWN' };
   }
-  revalidatePath('/admin/tasas');
+  revalidatePath('/admin/rates');
   return { success: true };
 }
 
@@ -106,6 +106,6 @@ export async function updateTaxRate(
   } catch {
     return { success: false, error: 'UNKNOWN' };
   }
-  revalidatePath('/admin/tasas');
+  revalidatePath('/admin/rates');
   return { success: true };
 }

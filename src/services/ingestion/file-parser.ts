@@ -3,7 +3,7 @@
  * Parses received vouchers (comprobantes recibidos) and issued vouchers
  * (comprobantes emitidos).
  *
- * Format verified against real files: docs/tax/formato-archivos-sri.md
+ * Format verified against real files: docs/tax/sri-file-format.md
  * (2026-09-20). Do not add columns beyond what that document lists --
  * see CLAUDE.md -> "Verification before touching the SRI format".
  */

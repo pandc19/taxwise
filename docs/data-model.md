@@ -18,7 +18,7 @@ Conventions:
   belongs to August regardless of where the server is located.
 - **Isolation**: RLS via `app.current_user_id`, with an explicit sentinel id
   for `asAdmin()` — never a variable left simply unset
-  ([ADR-004](adr/004-rls-por-usuario-con-prisma.md), update note).
+  ([ADR-004](adr/004-per-user-rls-with-prisma.md), update note).
 
 ---
 
@@ -54,7 +54,7 @@ Seeded by `prisma/seed.ts`: `STARTER` (1 taxpayer), `PROFESSIONAL`
 ### `user_taxpayers`
 
 A join table from day one, even though today every taxpayer has
-exactly one row ([ADR-003](adr/003-usuario-como-tenant-con-tabla-de-union.md)).
+exactly one row ([ADR-003](adr/003-user-as-tenant-with-join-table.md)).
 **Under RLS.**
 
 | Column | Type | Notes |
@@ -85,7 +85,7 @@ Unique `(user_id, taxpayer_id)`.
 | `iva_periodicity` | ENUM | `MONTHLY` \| `SEMIANNUAL` \| `ANNUAL`, default `MONTHLY` — entered by the user, editable |
 | `economic_activities` | JSONB | `[{code, description}]` |
 | `activity_fingerprint` | TEXT | hash of the set of activities |
-| `work_description` | TEXT | nullable, ≤ 280 chars — what the taxpayer does and for whom; sent to the AI ([ADR-017](adr/017-conocimiento-y-reglas-de-proveedores.md)) |
+| `work_description` | TEXT | nullable, ≤ 280 chars — what the taxpayer does and for whom; sent to the AI ([ADR-017](adr/017-supplier-knowledge-and-rules.md)) |
 | `work_setup` | TEXT[] | `REMOTE_HOME_OFFICE` \| `OWN_PREMISES` \| `FIELD_WORK` \| `OWN_EQUIPMENT` |
 | `typical_expenses` | TEXT[] | what they say they buy for work (`INTERNET`, `MOBILE`, `HARDWARE_EQUIPMENT`…) |
 | `purchase_treatment` | ENUM | `CLAIM_CREDIT` \| `DEDUCT_AS_EXPENSE`, default `CLAIM_CREDIT` — the taxpayer's own choice for the IVA of purchases that relate to their work |
@@ -94,7 +94,7 @@ Unique `(user_id, taxpayer_id)`.
 
 `activity_fingerprint` is recalculated whenever activities are edited. When
 it changes, supplier rules issued under the previous value are left pending
-revalidation ([ADR-006](adr/006-reglas-por-proveedor-y-actividad-economica.md)).
+revalidation ([ADR-006](adr/006-rules-by-supplier-and-economic-activity.md)).
 
 > **`created_by` was not in the original design.** It was added because
 > `Prisma.create()` always does an `INSERT ... RETURNING`, and Postgres
@@ -127,7 +127,7 @@ Unique `(taxpayer_id, tax_type, period_start)`.
 A Postgres trigger rejects INSERT, UPDATE, and DELETE on
 `invoices_received`/`invoices_issued` for the period while `locked_at` is
 set (`prisma/migrations/*_add_period_lock/`,
-[ADR-013](adr/013-bitacora-inmutable-y-bloqueo-de-periodo.md)).
+[ADR-013](adr/013-immutable-audit-log-and-period-lock.md)).
 
 ### `source_files`
 
@@ -152,7 +152,7 @@ set (`prisma/migrations/*_add_period_lock/`,
 ### `invoices_received`
 
 Mirrors the columns of the SRI file, without inventing fields
-([ADR-008](adr/008-solo-totales-sin-detalle-de-lineas.md)). **Under RLS.**
+([ADR-008](adr/008-totals-only-no-line-items.md)). **Under RLS.**
 
 | Column | Type | Source / notes |
 |---|---|---|
@@ -218,8 +218,8 @@ remains `UNCLASSIFIED`.
 ### `supplier_rules`
 
 A decision about a supplier for one taxpayer, revocable, never deleted
-([ADR-006](adr/006-reglas-por-proveedor-y-actividad-economica.md),
-[ADR-017](adr/017-conocimiento-y-reglas-de-proveedores.md)). It stores
+([ADR-006](adr/006-rules-by-supplier-and-economic-activity.md),
+[ADR-017](adr/017-supplier-knowledge-and-rules.md)). It stores
 **relevance**, not a category: the category is derived from the taxpayer's
 `purchase_treatment`. **Under RLS.**
 
@@ -240,7 +240,7 @@ A decision about a supplier for one taxpayer, revocable, never deleted
 
 ### `supplier_profiles`
 
-What a supplier is, whoever buys from it ([ADR-017](adr/017-conocimiento-y-reglas-de-proveedores.md)).
+What a supplier is, whoever buys from it ([ADR-017](adr/017-supplier-knowledge-and-rules.md)).
 Public supplier data only; no taxpayer or user identifiers. **No RLS.**
 
 | Column | Type | Notes |
@@ -257,7 +257,7 @@ Public supplier data only; no taxpayer or user identifiers. **No RLS.**
 ### `shared_supplier_catalog`
 
 Global, anonymous aggregate. **No taxpayer or user identifiers**
-([ADR-007](adr/007-modo-sin-ia-y-catalogo-compartido.md)). No
+([ADR-007](adr/007-no-ai-mode-and-shared-catalog.md)). No
 RLS. **Not implemented yet** — cascade level 2 passes an
 empty array (see `docs/guides/code-flow.md`).
 
@@ -273,7 +273,7 @@ empty array (see `docs/guides/code-flow.md`).
 ### `classification_events`
 
 Append-only; a trigger rejects `UPDATE` and `DELETE`
-([ADR-013](adr/013-bitacora-inmutable-y-bloqueo-de-periodo.md)). **Under RLS**
+([ADR-013](adr/013-immutable-audit-log-and-period-lock.md)). **Under RLS**
 (only `SELECT`/`INSERT` — no `UPDATE`/`DELETE` policies, further
 reinforced by the trigger).
 
@@ -314,14 +314,14 @@ Composite PK `(tax, valid_from)`. No RLS.
 | `verified_at` | DATE — when that source was verified |
 | `created_by` | UUID → `users.id`, the admin who loaded it |
 
-**Empty today.** No value in [`docs/tax/tasas-iva.md`](tax/tasas-iva.md)
+**Empty today.** No value in [`docs/tax/vat-rates.md`](tax/vat-rates.md)
 is verified yet — CLAUDE.md forbids loading a `[VERIFICAR]` from
 memory. `source`/`verified_at`/`created_by` were added together with the
-admin screen (`/admin/tasas`) — before 2026-10-04 the
+admin screen (`/admin/rates`) — before 2026-10-04 the
 schema had nowhere to record where a rate came from, even though the rule
 already existed in CLAUDE.md.
 
-### Results ([ADR-016](adr/016-resultados-sin-casilleros-del-formulario.md))
+### Results ([ADR-016](adr/016-results-not-mapped-to-form-fields.md))
 
 The system does not store or know Form 104's fields: results are kept
 under the domain's stable keys.
@@ -342,7 +342,7 @@ What the domain calculated, under stable keys. No form fields involved.
 ### `ai_usage`
 
 Composite PK `(user_id, taxpayer_id, period)`. Usage measurement, not for
-billing ([ADR-007](adr/007-modo-sin-ia-y-catalogo-compartido.md)). No RLS.
+billing ([ADR-007](adr/007-no-ai-mode-and-shared-catalog.md)). No RLS.
 **Empty today** — cascade levels 2 and 3 (shared catalog, AI) are not
 implemented.
 
@@ -369,4 +369,4 @@ Every table with RLS has both `ENABLE ROW LEVEL SECURITY` and
 that owns the tables, and without `FORCE` Postgres exempts it from its
 own policies. See
 [`prisma/migrations/*_add_rls/`](../prisma/migrations/) and
-[ADR-004](adr/004-rls-por-usuario-con-prisma.md).
+[ADR-004](adr/004-per-user-rls-with-prisma.md).

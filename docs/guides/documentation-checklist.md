@@ -19,21 +19,23 @@ What to update depending on the kind of change.
 - [ ] `src/app/[locale]/(app)/.../page.tsx`
 - [ ] `messages/es.json` — no literals in components
 - [ ] `docs/guides/code-flow.md` — add the screen to the walk-through
-- [ ] Check the vocabulary against [ADR-014](../adr/014-caracter-asistivo-y-disclaimers.md)
+- [ ] `docs/guides/user-guide.md` — what the screen is for, in simple words,
+      with the exact Spanish labels
+- [ ] Check the vocabulary against [ADR-014](../adr/014-assistive-character-and-disclaimers.md)
 - [ ] `CHANGELOG.md`
 
 ## New table or column
 
 - [ ] `prisma/schema.prisma` + migration
 - [ ] **Does it hold taxpayer data? → RLS policy**
-      ([ADR-004](../adr/004-rls-por-usuario-con-prisma.md))
+      ([ADR-004](../adr/004-per-user-rls-with-prisma.md))
 - [ ] `docs/data-model.md`
 - [ ] Money? → `DECIMAL(14,2)`
 - [ ] `CHANGELOG.md`
 
 ## Change to the SRI parser
 
-- [ ] `docs/tax/formato-archivos-sri.md` — with evidence from a real file
+- [ ] `docs/tax/sri-file-format.md` — with evidence from a real file
 - [ ] Cross off the corresponding pending item if verified
 - [ ] `tests/domain/` — a case with the real row
 - [ ] `CHANGELOG.md`

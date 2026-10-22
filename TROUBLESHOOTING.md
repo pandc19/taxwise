@@ -38,7 +38,7 @@ With data from two different taxpayers, confirm that one user never sees
 the other's, even by passing the identifier directly — the wrapper in
 [`src/lib/db.ts`](src/lib/db.ts) (`withUser`/`asAdmin`) is the only
 allowed path for touching these tables. **If this test fails, isolation
-between clients does not exist.** See [ADR-004](docs/adr/004-rls-por-usuario-con-prisma.md).
+between clients does not exist.** See [ADR-004](docs/adr/004-per-user-rls-with-prisma.md).
 
 > Pending: there's no permanent regression script for this yet — every
 > check so far has been done ad hoc and never left as a reproducible
@@ -47,7 +47,7 @@ between clients does not exist.** See [ADR-004](docs/adr/004-rls-por-usuario-con
 **Queries return other users' data.** The database user is a superuser,
 `FORCE ROW LEVEL SECURITY` is missing on the table, or the code is
 querying outside the wrapper that sets `app.current_user_id`.
-See [ADR-004](docs/adr/004-rls-por-usuario-con-prisma.md).
+See [ADR-004](docs/adr/004-per-user-rls-with-prisma.md).
 
 **Queries return nothing even though the data is there.**
 `app.current_user_id` is set to a value that doesn't match, or the
@@ -81,21 +81,6 @@ never be cleaned up afterward, not even by hand. For disposable test
 data, avoid status transitions on taxpayers/periods that you can't leave
 in place forever.
 
-## Form PDF extraction
-
-**Before widening `LABEL_LOOKBACK_LINES` or touching `BOILERPLATE_LINE` in
-`src/services/forms/pdf-field-extractor.ts`, re-test against a real PDF.**
-The first version of that code took all the text from the previous field
-onward as a candidate field name, with no limit — and in a real test
-against the sample PDF, that was enough for the taxpayer's RUC and legal
-name (repeated in the header of every page) to end up written into
-`form_fields.label` before anyone noticed. It was fixed by capping the
-window to 2 lines and adding an explicit list of header lines to ignore,
-but both are patches for one specific PDF, not a general guarantee. Any
-change to that file needs to repeat the test: extract from `samples/*.pdf`
-(never version-controlled, it carries personal data) and search the
-output for the taxpayer's RUC/name before trusting it.
-
 ## Dates
 
 **A date stored as `@db.Date` displays one day (or one month) earlier
@@ -104,8 +89,8 @@ never local midnight. In any timezone behind UTC (Ecuador, UTC-5),
 formatting that date with local-time getters (`getMonth()`,
 `getFullYear()`, `toLocaleDateString()` without `timeZone`) rolls it back
 a day — and if the day is 1, it rolls back an entire month. This actually
-happened with `tax_periods.period_start` (`periodos-client.tsx`) and
-`invoices_issued.issue_date` (`ventas-table.tsx`): an August period
+happened with `tax_periods.period_start` (`periods-client.tsx`) and
+`invoices_issued.issue_date` (`sales-table.tsx`): an August period
 displayed as July. The rule: any value read from a `@db.Date` column is
 displayed with the **UTC** getters (`getUTCMonth`/`getUTCFullYear`/
 `getUTCDate`) or with `toLocaleDateString(locale, { timeZone: 'UTC' })` —

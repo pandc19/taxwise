@@ -47,13 +47,13 @@ await db.invoicesReceived.findMany({ ... });
 ```
 
 The second form compiles and runs without error. That's the problem.
-See [ADR-004](../adr/004-rls-por-usuario-con-prisma.md).
+See [ADR-004](../adr/004-per-user-rls-with-prisma.md).
 
 **Prisma for CRUD and migrations. Aggregations (totals, proportionality
 factor) are pure TypeScript in `domain/`**
 (`src/domain/iva/calculator.ts`, `proportionality.ts`), not SQL — this
 way they're tested without a database, which is exactly what
-[ADR-001](../adr/001-nextjs-monolito-con-capa-de-dominio.md) calls for.
+[ADR-001](../adr/001-nextjs-monolith-with-domain-layer.md) calls for.
 Server Actions (`src/app/.../actions.ts`) fetch the already-classified
 vouchers with Prisma and hand them to the domain; the domain never
 touches the database.
@@ -92,14 +92,14 @@ const base = vatAmount.div(0.15);
 const rate = await getVatRate(invoice.issueDate);
 ```
 
-See [ADR-012](../adr/012-tasas-y-casilleros-como-datos-con-vigencia.md).
+See [ADR-012](../adr/012-rates-and-fields-as-data-with-effective-dates.md).
 
 ## Classification
 
 - The AI query is **per supplier**, not per voucher, and it answers
   whether the supplier relates to the taxpayer's work -- never credit vs.
   expense, which comes from the taxpayer's own setting
-  ([ADR-017](../adr/017-conocimiento-y-reglas-de-proveedores.md)).
+  ([ADR-017](../adr/017-supplier-knowledge-and-rules.md)).
 - RUC and taxpayer name are never sent to the AI.
 - Every verdict records `classification_source`, `rules_version`, and
   —if AI— `model_id` and `prompt_version`.
@@ -129,7 +129,7 @@ with `IVA = 0`, mixed invoices.
 
 The vocabulary never promises what the system doesn't do. Never "File"
 nor "Ready to file." See
-[ADR-014](../adr/014-caracter-asistivo-y-disclaimers.md).
+[ADR-014](../adr/014-assistive-character-and-disclaimers.md).
 
 All visible text goes through `next-intl`, in `messages/es.json`. No
 literals in components.

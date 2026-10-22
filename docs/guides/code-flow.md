@@ -53,14 +53,15 @@ Two nested layouts under `(app)`, plus a sidebar component:
   detail → admin list), not `history.back()`, so it also works after a
   refresh or from a deep link. Hidden on `/taxpayers`.
 - **`[taxpayerId]/layout.tsx`** — wraps everything under a given taxpayer
-  (`periodos`, `editar`). Secondary strip: business name + two icon
-  buttons ("Periods" = `Calendar`, "Edit taxpayer" = `SquarePen`, each
+  (`periods`, `suppliers`, `edit`). Secondary strip: business name + three
+  icon buttons ("Periods" = `Calendar`, "Suppliers" = `Store`, "Edit
+  taxpayer" = `SquarePen`, each
   with `title`/`aria-label` since they carry no visible text). Calls
   `getTaxpayer()` once per request; each child page may query it again
   if it needs more than the name (there's no memoization between layout
   and page yet).
 
-The cards on `/taxpayers` and `/[taxpayerId]/periodos` follow the
+The cards on `/taxpayers` and `/[taxpayerId]/periods` follow the
 same pattern: a `<Link>` wraps the name/icon (primary navigation, one
 click enters the taxpayer or the period) and the secondary controls —
 icon buttons to edit, a `Select`, or a delete button — sit as siblings of
@@ -68,55 +69,50 @@ the `<Link>` within the same `CardHeader`, never nested inside it (a
 `<button>` inside an `<a>` is invalid HTML and breaks keyboard focus).
 
 **Modals instead of inline forms** — creating a period
-(`periodos-client.tsx`) and loading a VAT rate (`admin/tasas/...`)
+(`periods-client.tsx`) and loading a VAT rate (`admin/rates/...`)
 both use `src/components/ui/dialog.tsx` (a wrapper around `radix-ui`'s
 `Dialog`, the first use of it in the project). Modal was chosen over a
 full page for short actions on a small form that don't need their own
 URL; creating/editing a taxpayer stays a full page because it has too
 many fields (a variable-length list of economic activities) for a modal.
 
-Within a period, the four screens (`ingesta`, `ventas`,
-`conciliacion`, the period root for pre-filing) share
-`period-step-nav.tsx`: a tab bar with the four steps in order, the
-current one highlighted, each one a direct link to the other three. It
-replaces the single "← Back" link that existed before — that link could
-only go up one level, and **the period root had no link to the other
-three screens at all**: once a period was created, there was no way to
-reach ingestion/sales/reconciliation without typing the URL by hand. The
-step bar doesn't live in any layout because the four routes don't share
-a common segment in the Next.js tree (`periodId` sits under `periodos/`,
-but `ingesta`/`ventas`/`conciliacion` are siblings of the period root,
-not its children) — each page imports and renders it on its own.
+Within a period, the four steps (`ingestion`, `sales`, `reconciliation`,
+`pre-filing`) share `period-step-nav.tsx`, rendered once by the period's
+`layout.tsx`: a tab bar with the four steps in order, the current one
+highlighted (derived from the URL), each one a direct link to the others,
+and a grid icon back to the period overview. The overview
+(`[periodId]/page.tsx`) is four cards, one per step.
 
 ## 0. Taxpayers and periods
 
 **Routes:** `/[locale]/(app)/taxpayers`, `/[locale]/(app)/taxpayers/new`,
-`/[locale]/(app)/[taxpayerId]/editar`, `/[locale]/(app)/[taxpayerId]/periodos`
+`/[locale]/(app)/[taxpayerId]/edit`, `/[locale]/(app)/[taxpayerId]/periods`
 **Server Actions:** `getMyTaxpayers()`, `createTaxpayer()`
 (`taxpayers/actions.ts`); `getTaxpayer()`, `updateTaxpayer()`
 (`[taxpayerId]/actions.ts`); `getTaxpayerPeriods()`, `createPeriod()`,
-`updatePeriodStatus()`, `deletePeriod()` (`[taxpayerId]/periodos/actions.ts`)
+`updatePeriodStatus()`, `deletePeriod()` (`[taxpayerId]/periods/actions.ts`)
 
 The landing page (`/[locale]`) redirects: to `/taxpayers` with a session,
 to `/login` without one. There are no more demo routes with fixed ids.
 
 - `/taxpayers` lists the user's taxpayers (via `user_taxpayers`,
-  filtered by RLS) and leads to `/taxpayers/new`, `/[taxpayerId]/periodos`,
-  or `/[taxpayerId]/editar`.
+  filtered by RLS) and leads to `/taxpayers/new`, `/[taxpayerId]/periods`,
+  or `/[taxpayerId]/edit`.
 - The taxpayer form also asks about their work (a short description,
   how they work, what they typically buy for work) and how to treat the IVA
   of purchases related to it (`purchase_treatment`); see Reconciliation.
 - `createTaxpayer()`/`updateTaxpayer()` compute `activityFingerprint` with
   `computeActivityFingerprint()` (`domain/iva/activity-fingerprint.ts` —
   a hash of the sorted economic activities, ADR-006) every time
-  activities are saved. **Revalidating `supplier_rules` when the
-  fingerprint changes (ADR-006) is not implemented** — the field is
-  recalculated and saved, nothing more. A duplicate RUC returns
+  activities are saved. When it changes, the user's own supplier rules
+  become "Por reconfirmar" on the Suppliers screen and stop applying until
+  reconfirmed (ADR-006, ADR-017), and remembered AI answers are asked
+  again. A duplicate RUC returns
   `RUC_IN_USE` in both actions, not an unhandled exception. The form
   (`taxpayer-form.tsx`, shared between create and edit) doesn't let the
   RUC be edited beyond format validation; if it changes, uniqueness is
   rechecked excluding the taxpayer itself.
-- `/[taxpayerId]/periodos` lists the taxpayer's periods and allows
+- `/[taxpayerId]/periods` lists the taxpayer's periods and allows
   creating a new one (year + month → `periodStart`/`periodEnd`, monthly
   and IVA for now). The actual uniqueness constraint is
   `(taxpayerId, taxType, periodStart)`, not year/month as such.
@@ -156,24 +152,24 @@ with a connection pool the `SET` and the query could land on different
 connections and RLS would silently be lost. `asAdmin(fn)` exists for
 userless paths (seeding, admin tasks) and sets an explicit sentinel id,
 never `RESET` — an unset variable must fail closed, not open. See
-[ADR-004](../adr/004-rls-por-usuario-con-prisma.md).
+[ADR-004](../adr/004-per-user-rls-with-prisma.md).
 
 ## 1. Ingestion
 
-**Route:** `/[locale]/(app)/[taxpayerId]/periodos/[periodId]/ingesta`
-**Server Action:** `uploadSourceFiles()` (`ingesta/actions.ts`)
+**Route:** `/[locale]/(app)/[taxpayerId]/periods/[periodId]/ingestion`
+**Server Action:** `uploadSourceFiles()` (`ingestion/actions.ts`)
 **Layers:** page → `services/ingestion` (parsing and validation) →
 `services/storage` (saves the raw file) → `domain/iva/access-key`
 (access-key consistency) → `withUser()`
 
 One file at a time for now (the SRI's multi-file upload layout —
-`samples/`, one file per day — still has no UI).
+one file per day — still has no UI).
 
 Per file:
 1. Compute `sha256` and detect the file type from the header columns
    (`detectFileType` — 12 columns with `RUC_EMISOR` = received, 8 with
    `COMPROBANTE` = issued). See
-   [`../tax/formato-archivos-sri.md`](../tax/formato-archivos-sri.md).
+   [`../tax/sri-file-format.md`](../tax/sri-file-format.md).
 2. Validate every row (below). A row whose only problem is `DUPLICATE`
    (already imported by an earlier upload) is *skipped*, not an error. If
    nothing new would be imported, stop here: no `source_files` row, no
@@ -185,11 +181,11 @@ Per file:
    so a retry overwrites instead of piling up orphans.
 4. Register it in `source_files`.
 
-The page (`ingesta/page.tsx`, server) also lists what the period already
+The page (`ingestion/page.tsx`, server) also lists what the period already
 holds via `getPeriodIngestion()`: upload history plus the received and
 issued vouchers and shows the "continue" link whenever the period has any
 (always to the next step, Issued sales);
-`ingesta-client.tsx` is the upload form and result.
+`ingestion-client.tsx` is the upload form and result.
 
 **Removing an upload** (`removeSourceFile()`, trash icon per file): in one
 transaction it deletes the vouchers imported from that file, the period's
@@ -203,14 +199,14 @@ Several files per period are fine: dedup is by access key.
 Per row (`ingestionService.validateReceivedRow`/`validateIssuedRow`):
 1. Decompose the `CLAVE_ACCESO` and cross-check it against date, type,
    RUC, and series
-   ([ADR-009](../adr/009-clave-de-acceso-como-clave-de-deduplicacion.md)).
+   ([ADR-009](../adr/009-access-key-as-deduplication-key.md)).
 2. Verify the voucher belongs to the period's taxpayer
    (received: `IDENTIFICACION_RECEPTOR`; issued: the RUC embedded in the
    access key).
 3. Verify `FECHA_EMISION` falls within the period.
 4. Verify the type against the allowlist in
    `services/ingestion/ingestion-service.ts` →
-   `VOUCHER_TYPE_WHITELIST` ([ADR-010](../adr/010-tratamiento-por-tipo-de-comprobante.md)).
+   `VOUCHER_TYPE_WHITELIST` ([ADR-010](../adr/010-treatment-by-voucher-type.md)).
    An unknown type → warning, not rejection; it falls to manual review in
    the classification step.
 5. Insert via `upsert` on `(taxpayer_id, access_key)` — re-uploading the
@@ -219,13 +215,13 @@ Per row (`ingestionService.validateReceivedRow`/`validateIssuedRow`):
 **Once finished, vouchers are saved with
 `processing_status = UNCLASSIFIED`.** If anything fails afterward,
 nothing is lost
-([ADR-011](../adr/011-ingesta-y-clasificacion-en-dos-pasos.md)).
+([ADR-011](../adr/011-two-step-ingestion-and-classification.md)).
 
 ## 2. Issued sales
 
-**Route:** `.../ventas`
+**Route:** `.../sales`
 **Server Actions:** `getPendingSales()`, `markSalesTreatment()`
-(`ventas/actions.ts`)
+(`sales/actions.ts`)
 
 The issued-invoices file doesn't indicate why a sale has `IVA = 0`
 (export, 0% with or without the right to credit, non-object/exempt), nor
@@ -237,26 +233,27 @@ user resolves that ambiguity.
   one (or several at once) with its actual destination. Each mark calls
   `markSalesTreatment()`, which updates `invoices_issued.sales_treatment`
   and writes an event to `classification_events`
-  ([ADR-013](../adr/013-bitacora-inmutable-y-bloqueo-de-periodo.md)).
+  ([ADR-013](../adr/013-immutable-audit-log-and-period-lock.md)).
 
 The proportionality factor (pre-filing screen) is not calculated while
 any sale remains `UNCLASSIFIED`.
 
 ## 3. Reconciliation
 
-**Route:** `.../conciliacion`
+**Route:** `.../reconciliation`
 **Server Actions:** `getPurchasesByStatus()`, `classifyPeriod()`,
-`applyManualClassification()` (`conciliacion/actions.ts`)
+`applyManualClassification()`, `getAiNotes()`, `getSupplierProfiles()`
+(`reconciliation/actions.ts`)
 
 Only vouchers with `IVA > 0` enter here
-([ADR-008](../adr/008-solo-totales-sin-detalle-de-lineas.md)).
+([ADR-008](../adr/008-totals-only-no-line-items.md)).
 
 **`classifyPeriod()`** — step 2 of ingestion
-([ADR-011](../adr/011-ingesta-y-clasificacion-en-dos-pasos.md)): groups
+([ADR-011](../adr/011-two-step-ingestion-and-classification.md)): groups
 open vouchers (`UNCLASSIFIED` or left in `REQUIRES_MANUAL_REVIEW` by an
 earlier run) by supplier and runs the
 `classificationCascade.classify()` cascade
-([ADR-005](../adr/005-clasificacion-en-cascada.md)):
+([ADR-005](../adr/005-classification-cascade.md)):
 
 ```
 ┌─ Level 1 ── the user's own supplier rule (current activity fingerprint)
@@ -280,7 +277,7 @@ work** (`RELATED` / `NOT_RELATED`). The stored category is then derived from
 the taxpayer's own `purchase_treatment` — `CLAIM_CREDIT` gives `CREDIT`,
 `DEDUCT_AS_EXPENSE` gives `COST_EXPENSE`, not related gives
 `NON_DEDUCTIBLE` — so the AI never decides credit
-([ADR-017](../adr/017-conocimiento-y-reglas-de-proveedores.md)). Changing
+([ADR-017](../adr/017-supplier-knowledge-and-rules.md)). Changing
 `purchase_treatment` is followed by "Reclasificar todo" on each open period;
 vouchers decided by the user keep their category.
 
@@ -288,11 +285,16 @@ vouchers decided by the user keep their category.
 takes `{ reclassify: true }` ("Reclasificar todo": every voucher whose
 source isn't `USER`) or `{ invoiceIds }` ("Reclasificar automáticamente"
 on the selected rows, whatever their state). Manual decisions are never
-touched by `reclassify`, a supplier rule the user created still wins over
-the AI, and a re-run that can't decide leaves an already-`PROCESSED`
-voucher as it was — unless the AI answered below 0.80, in which case the
-voucher goes back to Pendientes with the answer recorded (an AI failure or
-no-AI mode changes nothing). Every change logs an event with the old and new value.
+touched by `reclassify`, and a supplier rule the user created still wins
+over the AI. A re-run that can't decide leaves an already-`PROCESSED`
+voucher as it was, with two exceptions that send it back to Pendientes: the
+AI answered below 0.80, or the supplier is now known to need the user
+(mixed-use, or one the AI doesn't recognise). An AI failure or no-AI mode
+changes nothing. The plain "Clasificar ahora" button only handles vouchers
+still waiting. Every change logs an event with the old and new value.
+
+The tabs are: Sin clasificar, Con crédito tributario, Costo o gasto, No
+deducible, Pendientes, and Sin IVA (informativo).
 
 Each tab has a one-line description under the tab bar (and a `title`
 tooltip on the button), and every classified row shows who decided it:
@@ -364,18 +366,19 @@ synchronous within the request — revisit once a period's supplier count
 makes that slow ([`NEXT_STEPS.md`](../../NEXT_STEPS.md)).
 
 **`applyManualClassification()`** — manual classification, single or in
-bulk ([ADR-017](../adr/017-conocimiento-y-reglas-de-proveedores.md)):
+bulk ([ADR-017](../adr/017-supplier-knowledge-and-rules.md)):
 1. Updates `iva_category` and `processing_status = PROCESSED` on the
    **selected vouchers only** (source `USER`).
 2. Writes an event to `classification_events`.
 3. Creates or updates the supplier rule (level 1) **only if the user ticked
    "Aplicar a todos los comprobantes de este proveedor"**. A supplier often
-   sells both business and personal things, so a single decision no longer
-   classifies the rest. If the supplier has an active rule with a different
-   category, classifying a voucher differently revokes that rule (mixed
-   use) and says so in the event's reason.
+   sells both business and personal things, so a single decision doesn't
+   classify the rest. The rule stores a relevance (related / not related),
+   not a category. If the user's own rule for the supplier says the opposite
+   of what they just chose for a voucher, that rule is revoked (mixed use)
+   and the event's reason says so; a remembered AI answer is left alone.
 
-**Supplier rules screen** (`/[taxpayerId]/proveedores`, button in the
+**Supplier rules screen** (`/[taxpayerId]/suppliers`, button in the
 taxpayer's top strip): lists the taxpayer's active rules, lets the user
 change or revoke each one, and reconfirm in bulk the ones issued under an
 older activity fingerprint ("Por reconfirmar"; those are not applied, and
@@ -387,10 +390,10 @@ it off (or no provider key) the cascade goes straight from rules to review.
 
 ## 4. Pre-filing
 
-**Route:** `/[locale]/(app)/[taxpayerId]/periodos/[periodId]/predeclaracion`
+**Route:** `/[locale]/(app)/[taxpayerId]/periods/[periodId]/pre-filing`
 (step 4 of 4)
-**Server Actions:** `computePeriodResults()`, `lockPeriod()`,
-`reopenPeriod()` (the period's `actions.ts`)
+**Server Actions:** `computePeriodResults()`, `getPeriodResults()`,
+`lockPeriod()`, `reopenPeriod()` (the period's `actions.ts`)
 
 **The period root is the wizard overview, one level above the steps.**
 `[periodId]/page.tsx` always renders `PeriodOverview`: four cards, one
@@ -399,18 +402,16 @@ first marked "start here" only while the period has no vouchers.
 `[periodId]/layout.tsx` wraps every screen under the period with the
 period's title and `PeriodStepNav` (client; derives the current step
 from the URL, hides itself on the overview, and has a grid icon that
-returns to it). Before this, the root *was* the pre-filing screen, so
-opening a period dropped the user on step 4 with the other steps hidden
-behind a tab bar.
+returns to it).
 
 **`computePeriodResults()`** calls `calculatePeriodResults()`
 (`src/domain/iva/calculator.ts`) over the period's vouchers — pure
 domain logic, no aggregation SQL, tested without a database
-([ADR-001](../adr/001-nextjs-monolito-con-capa-de-dominio.md)) — and
+([ADR-001](../adr/001-nextjs-monolith-with-domain-layer.md)) — and
 saves each result to `period_results`. The domain produces **stable
 keys** (`SALES_TAXED`, `PURCHASES_WITH_CREDIT`, `PROPORTIONALITY_FACTOR`…).
 The system does not know Form 104's fields
-([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)); the
+([ADR-016](../adr/016-results-not-mapped-to-form-fields.md)); the
 screen shows these keys in plain language.
 Each purchase and taxed-sale result comes as a base and an IVA amount
 (`PURCHASES_WITH_CREDIT` / `…_VAT`, `PURCHASES_NO_CREDIT` / `…_VAT`,
@@ -423,7 +424,7 @@ The proportionality factor
 (`src/domain/iva/proportionality.ts`) counts exports and 0% sales with
 the right to credit in the numerator; a taxpayer who only exports
 services has a factor of `1.0000`
-([`../tax/formulario-104.md`](../tax/formulario-104.md)). It is
+([`../tax/vat-calculation.md`](../tax/vat-calculation.md)). It is
 blocked — with an explicit reason, never a made-up number — if there are
 unmarked sales or if there are no sales in the period (zero
 denominator).
@@ -433,17 +434,18 @@ writes an event. A Postgres trigger
 (`prisma/migrations/*_add_period_lock/`) rejects INSERT, UPDATE, and
 DELETE on `invoices_received`/`invoices_issued` for the period while it's
 locked — it lives in the database, not the application, so no path can
-bypass it ([ADR-013](../adr/013-bitacora-inmutable-y-bloqueo-de-periodo.md)).
+bypass it ([ADR-013](../adr/013-immutable-audit-log-and-period-lock.md)).
 
 **`reopenPeriod()`** clears `status`/`locked_at` and also writes an
 event — the reopening itself is logged, not just whatever gets edited
-afterward. Exposed in the UI (`predeclaracion-client.tsx`) as the
-"Reopen period" button, visible only when `isFiled` — the function used
-to exist before any button called it.
+afterward. Exposed in the UI (`pre-filing-client.tsx`) as the "Reabrir
+período" button, visible only when the period is filed. Marking a period
+as filed ("Marcar como presentado en el SRI") only records that the user
+filed it themselves; the system never files anything.
 
 ## 5. Administration
 
-**Route:** `/[locale]/(app)/admin/tasas`
+**Route:** `/[locale]/(app)/admin/rates`
 **Server Actions:** all in `admin/actions.ts`, all behind
 `requireAdmin()`, all running with `asAdmin()` — never `withUser()`,
 because the admin doesn't own any taxpayer.
@@ -452,13 +454,13 @@ The admin belongs to the system: they load verified VAT rates, and don't
 see taxpayer data or intervene in results — the disclaimer in
 `admin/layout.tsx` says so explicitly on screen. There is no form
 administration: the system doesn't know Form 104's fields
-([ADR-016](../adr/016-resultados-sin-casilleros-del-formulario.md)).
+([ADR-016](../adr/016-results-not-mapped-to-form-fields.md)).
 
 - **`createTaxRate()`** requires `source` and `verifiedAt` on the form
   itself — it can't be submitted without both (CLAUDE.md → "Normative
   values"). **No rate is loaded at all**: no row in
-  [`docs/tax/tasas-iva.md`](../tax/tasas-iva.md) is verified yet, so
-  `/admin/tasas` exists but its table stays empty in any real
+  [`docs/tax/vat-rates.md`](../tax/vat-rates.md) is verified yet, so
+  `/admin/rates` exists but its table stays empty in any real
   environment.
 - **`updateTaxRate()` / `deleteTaxRate()`** back the pencil and trash
   icons. A rate's `(tax, valid_from)` key isn't editable — delete and
@@ -469,6 +471,5 @@ administration: the system doesn't know Form 104's fields
 See [`NEXT_STEPS.md`](../../NEXT_STEPS.md) for the full list. The most
 relevant item for understanding the current state:
 
-- Shared catalog (level 2) of the classification cascade — today
-  `classifyPeriod()` passes it as an empty array; levels 1, 3, and 4 are
-  active (level 3's `src/services/ai/`, since 2026-10-04).
+- The anonymous, crowdsourced supplier catalog (ADR-007) was never built;
+  supplier knowledge today comes from `supplier_profiles` (ADR-017).

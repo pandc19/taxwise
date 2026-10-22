@@ -41,7 +41,7 @@
       "SEMIANNUAL": "Semestral",
       "ANNUAL": "Anual"
     },
-    "periodicityNotice": "El MVP solo genera pre-declaración para periodicidad mensual. Puedes registrar un contribuyente con otra periodicidad, pero no vas a poder calcular su declaración todavía.",
+    "periodicityNotice": "El MVP solo genera pre-declaración para periodicidad mensual. Puedes registrar un contribuyente con otra periodicidad, pero no vas a poder calcular sus totales todavía.",
     "activitiesHeading": "Actividades económicas",
     "activityCode": "Código",
     "activityDescription": "Descripción",
@@ -93,7 +93,7 @@
     "statusOptions": {
       "DRAFT": "Borrador",
       "UNDER_REVIEW": "En revisión",
-      "FILED": "Declarado"
+      "FILED": "Presentado"
     },
     "createButton": "Crear período",
     "alreadyExists": "Ya existe un período para ese mes",
@@ -132,10 +132,10 @@
   },
   "PeriodNav": {
     "overview": "Resumen del período",
-    "ingesta": "Ingesta",
-    "ventas": "Ventas emitidas",
-    "conciliacion": "Conciliación",
-    "predeclaracion": "Pre-declaración"
+    "ingestion": "Ingesta",
+    "sales": "Ventas emitidas",
+    "reconciliation": "Conciliación",
+    "pre-filing": "Pre-declaración"
   },
   "Ingesta": {
     "title": "Ingesta de archivos",
@@ -158,7 +158,7 @@
     "continueToVentas": "Continuar a Ventas emitidas →",
     "alreadyLoaded": "Ya cargadas",
     "removeConfirm": "¿Eliminar este archivo y los {count} comprobantes que importó? Se pierden sus clasificaciones. No se puede deshacer.",
-    "removeFiledError": "El período ya está declarado: no se puede modificar.",
+    "removeFiledError": "El período ya está marcado como presentado: no se puede modificar.",
     "removeError": "No se pudo eliminar el archivo.",
     "loadedHeading": "Cargado en este período",
     "loadedEmpty": "Todavía no se ha cargado ningún archivo en este período.",
@@ -303,7 +303,7 @@
   },
   "PreDeclaracion": {
     "title": "Pre-declaración",
-    "formLabel": "Formulario 104 (mensual)",
+    "filedBadge": "Marcado como presentado en el SRI",
     "draftBadge": "Borrador",
     "totalsUsedNotice": "Se trabaja con los totales de cada comprobante, no con el detalle de líneas.",
     "salesHeading": "Ventas",
@@ -334,9 +334,9 @@
     "reopenPeriod": "Reabrir período",
     "overviewHeading": "¿Por dónde empezar?",
     "overviewStartHere": "empezar aquí",
-    "overviewIngestaDescription": "Cargar los archivos del SRI de comprobantes recibidos o emitidos.",
-    "overviewVentasDescription": "Marcar el destino de las ventas con IVA 0%.",
-    "overviewConciliacionDescription": "Clasificar las compras con IVA > 0 por proveedor.",
-    "overviewPredeclaracionDescription": "Ver los resultados calculados y, cuando corresponda, marcar el período como declarado."
+    "overviewIngestionDescription": "Cargar los archivos del SRI de comprobantes recibidos o emitidos.",
+    "overviewSalesDescription": "Marcar el destino de las ventas con IVA 0%.",
+    "overviewReconciliationDescription": "Clasificar las compras con IVA > 0 por proveedor.",
+    "overviewPreFilingDescription": "Ver los resultados calculados y, cuando corresponda, marcar el período como presentado en el SRI."
   }
 }

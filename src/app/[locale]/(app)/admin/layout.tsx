@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
       <AdminNav
         items={[
-          { href: '/admin/tasas', label: t('navTasas') },
+          { href: '/admin/rates', label: t('navTasas') },
         ]}
       />
 

@@ -6,7 +6,7 @@ portal.
 
 > **taxap does not file tax returns or replace professional judgment.**
 > It produces calculation drafts that must be reviewed and validated by the
-> responsible party before being submitted to the SRI. See [ADR-014](docs/adr/014-caracter-asistivo-y-disclaimers.md).
+> responsible party before being submitted to the SRI. See [ADR-014](docs/adr/014-assistive-character-and-disclaimers.md).
 
 ## Who it's for
 
@@ -31,17 +31,16 @@ portal.
 
 ## Status
 
-Functional MVP for monthly VAT (Form 104): registration, file ingestion,
-purchase classification, sales marking, result calculation, and period
-locking all work end to end against a real database. Still no taxpayer
-creation screen (the stopgap is `scripts/seed-test-taxpayer.ts`) — see [`NEXT_STEPS.md`](NEXT_STEPS.md) for the exact status.
+Functional MVP for monthly VAT: registration, taxpayers (with a profile of
+their work), file ingestion, purchase classification with AI help,
+supplier rules, sales marking, result calculation, and period locking all
+work end to end against a real database. See [`NEXT_STEPS.md`](NEXT_STEPS.md)
+for the exact status and open items.
 
 Income Tax, Withholdings, and ATS are accounted for in the data model but
 are out of scope for the MVP.
 
 ## Stack
-
-In use today:
 
 | Layer | Technology |
 |---|---|
@@ -53,19 +52,16 @@ In use today:
 | VAT calculation | Pure domain in TypeScript/`Decimal.js` — no aggregation SQL |
 | Isolation | Row-Level Security per user |
 | Authentication | NextAuth v5 (credentials) + bcryptjs |
+| AI | Claude or OpenAI, chosen by `AI_PROVIDER`; structured output; optional (no-AI mode) |
 
-Planned, not implemented yet (see [`NEXT_STEPS.md`](NEXT_STEPS.md)):
-
-| Layer | Technology |
-|---|---|
-| AI (tier-3 classification) | Claude Haiku 4.5 via Batch API; Opus 5 for escalation |
-| Observability | Sentry |
-| Deployment | Not yet decided |
+Not implemented yet (see [`NEXT_STEPS.md`](NEXT_STEPS.md)): the Batch API
+pass for AI calls, observability (Sentry), and a deployment target.
 
 ## Documentation
 
 | Document | Content |
 |---|---|
+| [`docs/guides/user-guide.md`](docs/guides/user-guide.md) | How to use the system, in simple words |
 | [`GETTING_STARTED.md`](GETTING_STARTED.md) | Getting the project running locally, from zero |
 | [`docs/guides/code-flow.md`](docs/guides/code-flow.md) | How the app works today, screen by screen |
 | [`docs/data-model.md`](docs/data-model.md) | Commented schema |

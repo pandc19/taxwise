@@ -134,7 +134,7 @@ export class IngestionService {
 
     // 3. Belongingness to taxpayer. IDENTIFICACION_RECEPTOR is 10 digits
     // (the cédula) when the receiver is a persona natural, or 13 (the full
-    // RUC) otherwise -- docs/tax/formato-archivos-sri.md. A 13-digit RUC is
+    // RUC) otherwise -- docs/tax/sri-file-format.md. A 13-digit RUC is
     // the 10-digit cédula plus a 3-digit suffix (usually "001"), so a
     // 10-digit receptor matches whenever it's that taxpayer's cédula.
     const receptorMatches =
@@ -276,7 +276,7 @@ export class IngestionService {
   /**
    * Parse DD/MM/YYYY to Date. EMITIDAS' FECHA_EMISION includes a time
    * suffix ("DD/MM/AAAA HH:MM:SS") that RECIBIDAS does not — take only the
-   * date portion (docs/tax/formato-archivos-sri.md).
+   * date portion (docs/tax/sri-file-format.md).
    */
   private parseDate(dateStr: string): Date {
     const [day, month, year] = dateStr.split(' ')[0].split('/').map(Number);

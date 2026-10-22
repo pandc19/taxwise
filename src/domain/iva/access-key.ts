@@ -1,7 +1,7 @@
 /**
  * Access Key (Clave de Acceso) validation and decomposition.
  * 49 digits. Verified against real access keys in
- * docs/tax/formato-archivos-sri.md -> "The access key" (2026-09-20).
+ * docs/tax/sri-file-format.md -> "The access key" (2026-09-20).
  * ADR-009: Access key as the deduplication and integrity key
  *
  * Position | Length | Field
@@ -134,7 +134,7 @@ export function parseAccessKey(accessKey: string): DecomposedAccessKey {
  * If result is 11, check digit is 0; if 10, it's 1.
  *
  * Verified against both real access keys in
- * docs/tax/formato-archivos-sri.md (check digits 4 and 5, both correct
+ * docs/tax/sri-file-format.md (check digits 4 and 5, both correct
  * with this weighting over the first 48 digits).
  */
 export function calculateCheckDigit(first48: string): number {

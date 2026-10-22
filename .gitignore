@@ -20,7 +20,6 @@ coverage/
 next-env.d.ts
 
 # SRI files -- never versioned: they're real tax data
-/samples/
 *.txt
 !docs/**/*.txt
 

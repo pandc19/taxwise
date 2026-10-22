@@ -140,7 +140,7 @@ export function TaxpayerForm({
     if (mode === 'create') {
       router.push('/taxpayers');
     } else {
-      router.push(`/${taxpayerId}/periodos`);
+      router.push(`/${taxpayerId}/periods`);
     }
   }
 

@@ -24,17 +24,17 @@ export default async function TaxpayerLayout({
             <span className="truncate font-semibold">{taxpayer.businessName}</span>
           </div>
           <div className="flex shrink-0 gap-1">
-            <Link href={`/${taxpayerId}/periodos`} title={t('navPeriods')}>
+            <Link href={`/${taxpayerId}/periods`} title={t('navPeriods')}>
               <Button variant="ghost" size="icon-sm" aria-label={t('navPeriods')}>
                 <Calendar className="size-4" />
               </Button>
             </Link>
-            <Link href={`/${taxpayerId}/proveedores`} title={t('navSuppliers')}>
+            <Link href={`/${taxpayerId}/suppliers`} title={t('navSuppliers')}>
               <Button variant="ghost" size="icon-sm" aria-label={t('navSuppliers')}>
                 <Store className="size-4" />
               </Button>
             </Link>
-            <Link href={`/${taxpayerId}/editar`} title={t('navEdit')}>
+            <Link href={`/${taxpayerId}/edit`} title={t('navEdit')}>
               <Button variant="ghost" size="icon-sm" aria-label={t('navEdit')}>
                 <SquarePen className="size-4" />
               </Button>

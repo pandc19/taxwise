@@ -57,8 +57,8 @@ export async function updateTaxpayer(
       });
     });
 
-    revalidatePath(`/${taxpayerId}/periodos`);
-    revalidatePath(`/${taxpayerId}/editar`);
+    revalidatePath(`/${taxpayerId}/periods`);
+    revalidatePath(`/${taxpayerId}/edit`);
     revalidatePath('/taxpayers');
     return { success: true };
   } catch (err) {

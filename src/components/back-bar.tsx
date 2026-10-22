@@ -20,12 +20,12 @@ function parentPath(pathname: string): string | null {
     return '/taxpayers';
   }
 
-  // /{taxpayerId}/editar | /periodos -> taxpayers
-  // /{taxpayerId}/periodos/{periodId} -> periods
-  // /{taxpayerId}/periodos/{periodId}/{step} -> the period overview
+  // /{taxpayerId}/edit | /periods -> taxpayers
+  // /{taxpayerId}/periods/{periodId} -> periods
+  // /{taxpayerId}/periods/{periodId}/{step} -> the period overview
   if (seg.length <= 2) return '/taxpayers';
-  if (seg.length === 3) return `/${seg[0]}/periodos`;
-  return `/${seg[0]}/periodos/${seg[2]}`;
+  if (seg.length === 3) return `/${seg[0]}/periods`;
+  return `/${seg[0]}/periods/${seg[2]}`;
 }
 
 export function BackBar({ label }: { label: string }) {

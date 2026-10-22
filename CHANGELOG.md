@@ -5,6 +5,22 @@ Imperative mood: "Add", not "Added".
 
 ## [Unreleased]
 
+### Changed
+- Routes, folders, files and components renamed to English:
+  `periodos`→`periods`, `editar`→`edit`, `proveedores`→`suppliers`,
+  `ingesta`→`ingestion`, `ventas`→`sales`, `conciliacion`→`reconciliation`,
+  `predeclaracion`→`pre-filing`, `admin/tasas`→`admin/rates` (URLs change;
+  the UI text stays Spanish). ADRs and `docs/tax/` files renamed to English
+  slugs; links updated
+- Pre-filing no longer shows "Formulario 104 (mensual)" once a period is
+  marked as filed ("Marcado como presentado en el SRI"); the period status
+  "Declarado" is now "Presentado"
+- `docs/tax/formulario-104.md` removed; what the system calculates lives in
+  `docs/tax/vat-calculation.md`, without form field numbers
+
+### Added
+- `docs/guides/user-guide.md`: how to use the system, in simple words
+
 ### Added
 - Supplier profiles (ADR-017): what a supplier is is asked once per RUC and
   stored globally (`supplier_profiles`: kinds, summary, `mixed_use`)
@@ -107,8 +123,8 @@ Imperative mood: "Add", not "Added".
 - 14 ADRs with the MVP's architecture decisions
 - `docs/mvp-scope.md` with scope and acceptance criteria
 - `docs/data-model.md` with the commented schema
-- `docs/tax/formato-archivos-sri.md` verified against real SRI files
-- `docs/tax/tasas-iva.md` and `docs/tax/formulario-104.md` as scaffolding
+- `docs/tax/sri-file-format.md` verified against real SRI files
+- `docs/tax/vat-rates.md` and `docs/tax/formulario-104.md` as scaffolding
   pending normative verification
 - ADR-015: the system knows Form 104 (full catalog imported from a PDF
   that isn't saved) and relates each result to its field by meaning
@@ -207,7 +223,7 @@ Imperative mood: "Add", not "Added".
   VAT give a factor of zero. That's incorrect: exports and 0%-rated sales
   with credit entitlement add to the numerator (`1.0000` for someone who
   only exports services). Fixed in `mvp-scope.md`, `code-flow.md`,
-  `formato-archivos-sri.md`, and `CLAUDE.md`.
+  `sri-file-format.md`, and `CLAUDE.md`.
 - ADR-008 and ADR-010 annotated: `IVA = 0` without a decision applies to
   purchases, not sales; withholding vouchers might feed into field 609.
 - **`docker-compose.yml` removed.** Local development uses a
@@ -226,7 +242,7 @@ Imperative mood: "Add", not "Added".
   `camelCase`), and without `FORCE ROW LEVEL SECURITY` the `taxap` role —
   owner of the tables — was exempt from its own policies. Neither
   produced a visible error. Fixed and manually verified against the real
-  database. See [ADR-004](docs/adr/004-rls-por-usuario-con-prisma.md),
+  database. See [ADR-004](docs/adr/004-per-user-rls-with-prisma.md),
   `NEXT_STEPS.md`, and `CLAUDE.md` → "Easy mistakes to make here".
 
 ### Documentation audit
@@ -445,7 +461,7 @@ row failed with "Check digit mismatch", "Empty digits must be 000", and
   type of bug already fixed in `file-parser.ts` on 2026-09-30 — this
   time in the file that was missed in that same pass. The layout of
   `parseAccessKey` didn't match the verified table in
-  `docs/tax/formato-archivos-sri.md` (which ADR-009 did document
+  `docs/tax/sri-file-format.md` (which ADR-009 did document
   correctly: the code was never aligned with either one):
   - The real check digit is at position 48 (the last one), not 23.
     Position 23 is the "environment" digit (1 test, 2 production) —
@@ -460,7 +476,7 @@ row failed with "Check digit mismatch", "Empty digits must be 000", and
     correct, but it was applied to the first 23 digits instead of the
     first 48.
   Rewritten and verified against the two real keys in
-  `formato-archivos-sri.md` (check digits 4 and 5, both correct with the
+  `sri-file-format.md` (check digits 4 and 5, both correct with the
   fixed layout).
 - **The ingestion Server Action was passing the taxpayer's UUID where
   `ingestion-service.ts` expected its RUC.** Hence the second error in
@@ -475,7 +491,7 @@ row failed with "Check digit mismatch", "Empty digits must be 000", and
 - **The ownership check didn't distinguish a cédula (10 digits) from a
   full RUC (13 digits).** `IDENTIFICACION_RECEPTOR` carries the cédula
   when the recipient is a natural person (documented in
-  `formato-archivos-sri.md`), and the full RUC is the cédula plus a
+  `sri-file-format.md`), and the full RUC is the cédula plus a
   3-digit suffix. A direct comparison (`!==`) would have kept failing
   for the user's same file even after fixing the UUID bug. It now
   accepts both cases.
@@ -655,7 +671,7 @@ they left.
 
 ### No change (deliberate)
 - **No VAT rate ended up loaded.** Both rows in
-  [`docs/tax/tasas-iva.md`](docs/tax/tasas-iva.md) remain `[VERIFICAR]`
+  [`docs/tax/vat-rates.md`](docs/tax/vat-rates.md) remain `[VERIFICAR]`
   — CLAUDE.md forbids filling in a `[VERIFICAR]` from memory, so
   `/admin/tasas` ships empty on purpose.
 - **`result_mappings` still isn't calculated.** ADR-015's 4-tier cascade
@@ -672,7 +688,7 @@ they left.
   `GROSS+NET` / `GROSS+NET+TAX` based on position, following the form's
   fixed column order ("VALOR BRUTO · VALOR NETO · IMPUESTO GENERADO").
   Verified against the real sample PDF: the 10 codes already documented
-  in [`formulario-104.md`](docs/tax/formulario-104.md) (401/411/421,
+  in `formulario-104.md` (since removed) (401/411/421,
   500/510/520, 502/512/522, 563) come out with the correct code and
   column type.
 - `createFormVersionDraft()` now runs that extraction over the uploaded

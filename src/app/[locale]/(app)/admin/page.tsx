@@ -1,5 +1,5 @@
 import { redirect } from '@/i18n/navigation';
 
 export default function AdminPage() {
-  redirect({ href: '/admin/tasas', locale: 'es' });
+  redirect({ href: '/admin/rates', locale: 'es' });
 }

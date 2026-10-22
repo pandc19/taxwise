@@ -34,7 +34,7 @@ export default async function TaxpayersPage() {
             {taxpayers.map((taxpayer) => (
               <Card key={taxpayer.id} className="transition-shadow hover:shadow-md">
                 <CardHeader className="flex-row items-start justify-between gap-2">
-                  <Link href={`/${taxpayer.id}/periodos`} className="min-w-0 flex-1 group">
+                  <Link href={`/${taxpayer.id}/periods`} className="min-w-0 flex-1 group">
                     <div className="flex items-center gap-2">
                       <Building2 className="size-4 shrink-0 text-muted-foreground" />
                       <CardTitle className="truncate text-base group-hover:underline">
@@ -43,12 +43,12 @@ export default async function TaxpayersPage() {
                     </div>
                   </Link>
                   <div className="flex shrink-0 gap-1">
-                    <Link href={`/${taxpayer.id}/periodos`} title={t('periodsLink')}>
+                    <Link href={`/${taxpayer.id}/periods`} title={t('periodsLink')}>
                       <Button variant="outline" size="icon-sm" aria-label={t('periodsLink')}>
                         <Calendar className="size-4" />
                       </Button>
                     </Link>
-                    <Link href={`/${taxpayer.id}/editar`} title={t('navEdit')}>
+                    <Link href={`/${taxpayer.id}/edit`} title={t('navEdit')}>
                       <Button variant="outline" size="icon-sm" aria-label={t('navEdit')}>
                         <SquarePen className="size-4" />
                       </Button>

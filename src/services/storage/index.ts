@@ -12,7 +12,7 @@
  * hash is already computed before that -- and re-uploading identical
  * content lands on the same path instead of accumulating duplicates.
  *
- * `/storage` is gitignored, same sensitivity class as `/samples` (real
+ * `/storage` is gitignored, same sensitivity class as the SRI `.txt` files (real
  * tax data). Only a local filesystem driver exists today -- no env var,
  * no abstraction to select a different one, since there's nothing to
  * switch to yet. Add one if/when S3 (or similar) is actually needed.

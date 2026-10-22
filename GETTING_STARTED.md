@@ -44,7 +44,7 @@ Create the `taxap` user and the `taxap_dev` database:
 > superusers bypass Row-Level Security unconditionally, even with
 > `FORCE ROW LEVEL SECURITY`. A misconfigured deployment that uses the
 > `postgres` user silently disables all isolation between users.
-> See [ADR-004](docs/adr/004-rls-por-usuario-con-prisma.md).
+> See [ADR-004](docs/adr/004-per-user-rls-with-prisma.md).
 
 Verify that it isn't one:
 
@@ -80,12 +80,20 @@ ANTHROPIC_API_KEY=""
 ```
 
 `AI_PROVIDER`/`ANTHROPIC_API_KEY` (or `OPENAI_API_KEY` if `AI_PROVIDER=openai`)
-are **optional**. Without a key for the selected provider, the system runs in
-no-AI mode: the cascade runs tiers 1, 2, and 4, and more vouchers fall
-through to the review inbox. Nothing breaks. See [ADR-007](docs/adr/007-modo-sin-ia-y-catalogo-compartido.md).
-The two providers (`src/services/ai/`) implement the same `AiClassifier`
-interface, so switching one for the other is just `AI_PROVIDER` -- no code
-change.
+are **optional**. Without a key for the selected provider (or with the
+account's AI switched off), the system runs in no-AI mode: the user's own
+rules and the match against what they say they buy for work still decide
+what they can, and everything else goes to the review inbox. Nothing
+breaks. See [ADR-007](docs/adr/007-no-ai-mode-and-shared-catalog.md) and
+[ADR-017](docs/adr/017-supplier-knowledge-and-rules.md). The two providers
+(`src/services/ai/`) implement the same `AiClassifier` interface, so
+switching one for the other is just `AI_PROVIDER` -- no code change.
+
+Which model answers is set by `*_BULK_MODEL`, `*_ESCALATION_MODEL` and
+`*_PROFILE_MODEL` (`CLAUDE_` or `OPENAI_` prefix). Knowing *who a supplier
+is* is world knowledge, asked once per RUC and shared by every taxpayer, so
+it uses the strong model by default; a small model confused a steel supplier
+with a computer shop.
 
 If the AI call fails with *"This API key is not scoped to a workspace"*, set
 `ANTHROPIC_WORKSPACE_ID` to your workspace id (or use a workspace-scoped key).
@@ -100,7 +108,7 @@ npm run db:seed
 
 The seed (`prisma/seed.ts`) only loads the plans (`plans`) — needed so
 `users.plan_code` has something to point to when registering an account.
-**It does not load normative data** (VAT rates, field map): any value
+**It does not load normative data** (VAT rates): any value
 without a source and verification date is marked `[VERIFICAR]` and is not
 loaded into the system (CLAUDE.md → "Normative values"). Those are loaded
 manually once verified — see [`docs/tax/`](docs/tax/).
@@ -113,47 +121,23 @@ npm run dev
 
 http://localhost:3000 → redirects to `/es` (the only locale for now).
 
-## 5. Full walkthrough, from zero to pre-filing
+## 5. First run
 
-Everything from here on happens inside the application — no URL is typed
-by hand beyond the initial one.
+Everything happens inside the application. The step-by-step guide for
+people using the system, with what each screen does, is
+[`docs/guides/user-guide.md`](docs/guides/user-guide.md). In short:
+register and log in; create a taxpayer (fill in "Tu trabajo" — it is what
+lets the system tell which purchases relate to the work); create a period;
+then walk its four steps: ingestion, sales, reconciliation, pre-filing.
 
-1. **Registration and login.** Visiting `http://localhost:3000` redirects
-   to `/es/login` (no session). Go to `/es/register`, create the account,
-   then log back in. With a session, the landing page redirects to
-   `/es/taxpayers`.
-2. **Create a taxpayer.** On `/es/taxpayers` (empty the first time), click
-   "Register the first one" → form: RUC (13 digits), legal name, regime,
-   VAT periodicity, and economic activities. The MVP only calculates a
-   pre-filing for **monthly** periodicity; with any other periodicity the
-   taxpayer is registered but without calculation yet.
-3. **Create a period.** After creating the taxpayer, you return to the
-   list; "View periods →" leads to `/es/[taxpayerId]/periodos`. There,
-   "+ New period" and choose year/month. Each period starts out as
-   "Draft".
-4. **Enter the period.** Clicking the created period leads to its root
-   screen (pre-filing), with links to the three flow screens:
-   - **Ingestion** — upload an SRI `.txt` voucher file (received or
-     issued). See the expected format in
-     [`docs/tax/formato-archivos-sri.md`](docs/tax/formato-archivos-sri.md).
-   - **Issued sales** — mark the destination of sales with `IVA = 0%`
-     (export, 0% with/without credit entitlement, not subject/exempt).
-     The proportionality factor is not calculated while any remain
-     unmarked.
-   - **Reconciliation** — classify purchases with `IVA > 0` (tax credit,
-     cost or expense, or exclude), by supplier.
-5. **Pre-filing.** Back at the period's root, the calculated results (no
-   form field yet, see [`NEXT_STEPS.md`](NEXT_STEPS.md)) and the option
-   to mark the period as filed.
-
-For details on what each Server Action does and why, see
+For what each Server Action does and why, see
 [`docs/guides/code-flow.md`](docs/guides/code-flow.md). For errors during
-this walkthrough, see [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
+setup, see [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
 ## 6. Administration (optional)
 
-To upload Form 104 or load a VAT rate you need an `ADMIN` account —
-normal registration (step 1) always creates `INDIVIDUAL` accounts.
+To load a VAT rate you need an `ADMIN` account — normal registration always
+creates `INDIVIDUAL` accounts.
 
 Set `ADMIN_EMAIL` (and `ADMIN_PASSWORD`, only needed the first time) in
 `.env.local`, then run the seed:
@@ -162,18 +146,15 @@ Set `ADMIN_EMAIL` (and `ADMIN_PASSWORD`, only needed the first time) in
 npm run db:seed
 ```
 
-If `ADMIN_EMAIL` already exists (for example, the account you used in
-step 1), this promotes it to `ADMIN` without touching its password. If
-it doesn't exist yet, it's created with `ADMIN_PASSWORD`. Either way
-it's safe to run again — re-seeding never duplicates the account. Log in
-with that account and the sidebar will show "Administration".
+If `ADMIN_EMAIL` already exists (for example, the account you registered),
+this promotes it to `ADMIN` without touching its password. If it doesn't
+exist yet, it's created with `ADMIN_PASSWORD`. Either way it's safe to run
+again — re-seeding never duplicates the account. Log in with that account
+and the sidebar will show "Administración".
 
-On `/admin/formularios`, "New version" uploads a PDF — only to compute
-its fingerprint, it isn't saved — and creates a draft. Fields are added
-there by hand (there's no automatic PDF extraction yet) and then
-published. On `/admin/tasas`, loading a rate requires its source and
-verification date; none is loaded by default because none has been
-verified yet (`docs/tax/tasas-iva.md`).
+On `/admin/rates`, loading a rate requires its source and verification date;
+none is loaded by default because none has been verified yet
+(`docs/tax/vat-rates.md`).
 
 ## Database commands
 
@@ -181,7 +162,7 @@ verified yet (`docs/tax/tasas-iva.md`).
 |---|---|
 | `npm run db:migrate` | Applies pending migrations (`prisma migrate dev`) |
 | `npm run db:seed` | Seeds the plans, and the `ADMIN_EMAIL` account if that env var is set (`prisma/seed.ts`) |
-| `npm run db:reset` | Drops everything in `public` (tables, types, functions) and migrates + seeds again. Blocked if `NODE_ENV=production`. |
+| `npm run db:reset` | Drops everything in `public` (tables, types, functions), deletes the locally stored uploads in `storage/`, and migrates + seeds again. Blocked if `NODE_ENV=production`. |
 
 Direct database access, if needed:
 
@@ -199,10 +180,10 @@ npx prisma studio
 ## Test data
 
 The SRI's `.txt` files are **never version-controlled** — they are real
-tax data. Place them in `samples/`, which is in `.gitignore`.
+tax data. Keep them anywhere you like: every `*.txt` is in `.gitignore`.
 
 For the expected format, see
-[`docs/tax/formato-archivos-sri.md`](docs/tax/formato-archivos-sri.md).
+[`docs/tax/sri-file-format.md`](docs/tax/sri-file-format.md).
 
 ## Resetting from scratch
 

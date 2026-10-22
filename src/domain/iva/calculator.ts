@@ -199,7 +199,7 @@ export function calculatePeriodResults(
 
     // Credited VAT = VAT of the purchases WITH the right to credit * factor.
     // Purchases without that right (cost or expense) never enter: their IVA
-    // is not credit at any factor (docs/tax/formulario-104.md).
+    // is not credit at any factor (docs/tax/vat-calculation.md).
     const totalPurchaseVat = purchasesWithCreditVat;
     const creditedVat = totalPurchaseVat
       .times(factorCalc.factor)

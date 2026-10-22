@@ -1,7 +1,7 @@
 /**
  * File parser tests.
  * Verify SRI format parsing for received and issued invoices.
- * Example rows taken from docs/tax/formato-archivos-sri.md (verified
+ * Example rows taken from docs/tax/sri-file-format.md (verified
  * against real files 2026-09-20).
  */
 
