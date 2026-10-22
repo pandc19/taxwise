@@ -1,5 +1,7 @@
 # ADR-005: Four-level classification cascade
 
+> **Partially superseded (2026-10-22) by [ADR-017](017-conocimiento-y-reglas-de-proveedores.md):** the cascade order and the "every manual decision writes a rule" loop. The rest stands.
+
 ## Status
 Accepted
 

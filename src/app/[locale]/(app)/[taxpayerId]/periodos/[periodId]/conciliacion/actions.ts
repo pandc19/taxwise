@@ -92,7 +92,6 @@ export async function classifyPeriod(
   options: ClassifyOptions = {}
 ): Promise<ClassifyResult> {
   const userId = await getCurrentUserId();
-  const aiClassifier = getAiClassifier(); // null in no-AI mode (ADR-007)
   const result: ClassifyResult = { aiFailures: 0 };
 
   // Three phases, so no AI call ever runs inside a DB transaction (Prisma's
@@ -100,7 +99,7 @@ export async function classifyPeriod(
   // supplier easily exceeds that): read, ask the AI, write.
 
   // Phase 1 -- read.
-  const { pending, taxpayer, rules } = await withUser(userId, async (tx) => {
+  const { pending, taxpayer, rules, aiEnabled } = await withUser(userId, async (tx) => {
     // Default: only what is still open. REQUIRES_MANUAL_REVIEW is what an
     // earlier engine run left unresolved (a manual decision makes it
     // PROCESSED), so re-running may now resolve it -- e.g. once an AI key
@@ -129,8 +128,16 @@ export async function classifyPeriod(
         supplierRuc: { in: [...new Set(pending.map((i) => i.supplierRuc))] },
       },
     });
-    return { pending, taxpayer, rules };
+    const { aiEnabled } = await tx.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { aiEnabled: true },
+    });
+    return { pending, taxpayer, rules, aiEnabled };
   });
+
+  // No-AI mode (ADR-007) is a per-account setting, and also what a missing
+  // provider key means: either way the cascade falls through to review.
+  const aiClassifier = aiEnabled ? getAiClassifier() : null;
 
   const bySupplier = new Map<string, typeof pending>();
   for (const invoice of pending) {
@@ -139,6 +146,11 @@ export async function classifyPeriod(
     bySupplier.get(key)!.push(invoice);
   }
   const ruleBySupplier = new Map(rules.map((r) => [r.supplierRuc, r]));
+  // A rule issued under an older activity fingerprint doesn't decide
+  // anything (ADR-006) -- and it must not stop the AI from being asked.
+  const currentRuleSuppliers = new Set(
+    rules.filter((r) => r.activityFingerprint === taxpayer.activityFingerprint).map((r) => r.supplierRuc)
+  );
 
   // ADR-010: a single unrecognized type in the group sends the whole
   // supplier to manual review, without going through the cascade.
@@ -167,7 +179,7 @@ export async function classifyPeriod(
   const aiResults = new Map<string, SupplierClassificationResult>();
   if (aiClassifier) {
     const toAsk = [...bySupplier.entries()].filter(
-      ([ruc]) => !needsReviewBySupplier.get(ruc) && !ruleBySupplier.has(ruc)
+      ([ruc]) => !needsReviewBySupplier.get(ruc) && !currentRuleSuppliers.has(ruc)
     );
     await mapWithConcurrency(toAsk, AI_CONCURRENCY, async ([supplierRuc, invoices]) => {
       const representative = invoices[0];
@@ -283,14 +295,19 @@ export async function classifyPeriod(
 }
 
 /**
- * Manual classification (single or bulk). Creates or updates the
- * supplier's rule so it resolves on its own next time (ADR-006).
+ * Manual classification (single or bulk). It decides only the selected
+ * vouchers (ADR-017): a supplier often sells both business and personal
+ * things, so one decision must not silently classify the rest. A rule for
+ * the supplier is created or updated only when `applyToSupplier` is set.
+ * Classifying a voucher differently from the supplier's active rule shows
+ * the supplier is mixed-use, so that rule is revoked.
  */
 export async function applyManualClassification(
   invoiceIds: string[],
   category: IvaCategory,
   taxpayerId: string,
-  periodId: string
+  periodId: string,
+  options: { applyToSupplier?: boolean } = {}
 ) {
   const userId = await getCurrentUserId();
 
@@ -309,6 +326,46 @@ export async function applyManualClassification(
         },
       });
 
+      // Revocable rule, unique per (taxpayer, supplier) while not revoked
+      // (ADR-006) -- not a composite key the schema can declare, so it's
+      // looked up first instead of an upsert by PK.
+      const existingRule = await tx.supplierRule.findFirst({
+        where: { taxpayerId, supplierRuc: invoice.supplierRuc, revokedAt: null },
+      });
+
+      let reason = 'Manual: user';
+      if (options.applyToSupplier) {
+        if (existingRule) {
+          await tx.supplierRule.update({
+            where: { id: existingRule.id },
+            data: {
+              ivaCategory: category,
+              activityFingerprint: taxpayer.activityFingerprint,
+              source: 'USER',
+              timesApplied: { increment: 1 },
+            },
+          });
+        } else {
+          await tx.supplierRule.create({
+            data: {
+              taxpayerId,
+              supplierRuc: invoice.supplierRuc,
+              activityFingerprint: taxpayer.activityFingerprint,
+              ivaCategory: category,
+              source: 'USER',
+              createdBy: userId,
+            },
+          });
+        }
+        reason = 'Manual: user, applied to the supplier';
+      } else if (existingRule && existingRule.ivaCategory !== category) {
+        await tx.supplierRule.update({
+          where: { id: existingRule.id },
+          data: { revokedAt: new Date() },
+        });
+        reason = 'Manual: user; supplier rule revoked (mixed use)';
+      }
+
       await tx.classificationEvent.create({
         data: {
           receivedInvoiceId: id,
@@ -319,38 +376,9 @@ export async function applyManualClassification(
           newValue: category,
           actorType: 'USER',
           actorUserId: userId,
-          reason: 'Manual: user',
+          reason,
         },
       });
-
-      // Revocable rule, unique per (taxpayer, supplier) while not revoked
-      // (ADR-006) -- not a composite key the schema can declare, so it's
-      // looked up first instead of an upsert by PK.
-      const existingRule = await tx.supplierRule.findFirst({
-        where: { taxpayerId, supplierRuc: invoice.supplierRuc, revokedAt: null },
-      });
-
-      if (existingRule) {
-        await tx.supplierRule.update({
-          where: { id: existingRule.id },
-          data: {
-            ivaCategory: category,
-            activityFingerprint: taxpayer.activityFingerprint,
-            timesApplied: { increment: 1 },
-          },
-        });
-      } else {
-        await tx.supplierRule.create({
-          data: {
-            taxpayerId,
-            supplierRuc: invoice.supplierRuc,
-            activityFingerprint: taxpayer.activityFingerprint,
-            ivaCategory: category,
-            source: 'USER',
-            createdBy: userId,
-          },
-        });
-      }
     }
   });
 

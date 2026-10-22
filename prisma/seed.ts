@@ -1,8 +1,7 @@
 /**
  * Everything this app needs seeded to start, in one idempotent pass:
  * plans (FK of users.plan_code), and -- only if ADMIN_EMAIL is set --
- * the one ADMIN account that can reach /admin/formularios and
- * /admin/tasas. Re-running this script, including via `npm run
+ * the one ADMIN account that can reach /admin/tasas. Re-running this script, including via `npm run
  * db:reset`, must never create a duplicate: plans are upserted by their
  * `code` PK, and the admin account is looked up by `email` (@unique)
  * before deciding whether to create or just promote it.

@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Building2, Calendar, SquarePen } from 'lucide-react';
+import { Building2, Calendar, SquarePen, Store } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { getTaxpayer } from './actions';
@@ -27,6 +27,11 @@ export default async function TaxpayerLayout({
             <Link href={`/${taxpayerId}/periodos`} title={t('navPeriods')}>
               <Button variant="ghost" size="icon-sm" aria-label={t('navPeriods')}>
                 <Calendar className="size-4" />
+              </Button>
+            </Link>
+            <Link href={`/${taxpayerId}/proveedores`} title={t('navSuppliers')}>
+              <Button variant="ghost" size="icon-sm" aria-label={t('navSuppliers')}>
+                <Store className="size-4" />
               </Button>
             </Link>
             <Link href={`/${taxpayerId}/editar`} title={t('navEdit')}>

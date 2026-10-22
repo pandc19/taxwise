@@ -24,6 +24,10 @@ opening to real users.
 
 ## To build
 
+- [ ] **Supplier profiles and work profile** (ADR-017, phases 2–3):
+      global `supplier_profiles`, relevance-only AI with remembered answers,
+      the taxpayer's work description/tags/typical expenses, and the
+      credit-vs-expense setting. Waiting on the ADR's open questions.
 - [ ] **Batch API for the AI classification pass** (`src/services/ai/`,
       since 2026-10-04; CLAUDE.md's model table calls for it —
       "Batch API para el pase masivo"). `classifyPeriod()` currently

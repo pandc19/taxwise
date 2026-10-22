@@ -1,6 +1,6 @@
 /**
- * Development database reset — drops all application tables, then re-runs
- * every migration from scratch.
+ * Development database reset — drops all application tables and the
+ * locally stored source files, then re-runs every migration from scratch.
  *
  * Usage:
  *   npm run db:reset
@@ -17,6 +17,8 @@ config({ path: '.env.local' });
 
 import { Pool } from 'pg';
 import { execSync } from 'child_process';
+import { rmSync } from 'fs';
+import path from 'path';
 
 if (process.env.NODE_ENV === 'production') {
   console.error('db:reset must not run in production (NODE_ENV=production).');
@@ -75,6 +77,11 @@ async function reset() {
     client.release();
     await pool.end();
   }
+
+  // Uploaded source files live outside the database (src/services/storage/);
+  // left behind they would point at nothing.
+  console.log('Removing stored source files...');
+  rmSync(path.resolve(process.cwd(), 'storage'), { recursive: true, force: true });
 
   console.log('Running migrations...');
   execSync('npx prisma migrate deploy', { stdio: 'inherit' });

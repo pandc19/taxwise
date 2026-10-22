@@ -78,6 +78,7 @@ export function ConciliacionTable({
   const common = useTranslations('Common');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState('');
+  const [applyToSupplier, setApplyToSupplier] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Vouchers without IVA never enter classification (CLAUDE.md), so they
@@ -159,10 +160,12 @@ export function ConciliacionTable({
         Array.from(selected),
         bulkAction as IvaCategory,
         taxpayerId,
-        periodId
+        periodId,
+        { applyToSupplier }
       );
       setSelected(new Set());
       setBulkAction('');
+      setApplyToSupplier(false);
     });
   }
 
@@ -276,7 +279,7 @@ export function ConciliacionTable({
         </p>
       ) : (
         <div className="rounded-md border">
-          <div className="flex items-center gap-3 border-b p-3">
+          <div className="flex flex-wrap items-center gap-3 border-b p-3">
             <Checkbox
               checked={selected.size === visible.length && visible.length > 0}
               onCheckedChange={(checked) =>
@@ -295,6 +298,13 @@ export function ConciliacionTable({
                 <SelectItem value="NON_DEDUCTIBLE">{t('nonDeductible')}</SelectItem>
               </SelectContent>
             </Select>
+            <label className="flex items-center gap-1.5 text-sm" title={t('applyToSupplierHint')}>
+              <Checkbox
+                checked={applyToSupplier}
+                onCheckedChange={(checked) => setApplyToSupplier(checked === true)}
+              />
+              {t('applyToSupplier')}
+            </label>
             <Button size="sm" onClick={applyBulk} disabled={isPending || selected.size === 0}>
               {common('confirm')}
             </Button>

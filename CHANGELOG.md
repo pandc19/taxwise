@@ -5,6 +5,20 @@ Imperative mood: "Add", not "Added".
 
 ## [Unreleased]
 
+### Changed
+- Manual classification applies to the selected vouchers only; a supplier
+  rule is created only with the new "Aplicar a todos los comprobantes de
+  este proveedor" option, and classifying a voucher differently from the
+  supplier's rule revokes it (ADR-017, phase 1)
+- A rule issued under an older activity fingerprint no longer stops the AI
+  from being asked
+- `users.ai_enabled` is now enforced by `classifyPeriod()`
+- `npm run db:reset` also removes locally stored source files
+
+### Added
+- Supplier rules screen (`/[taxpayerId]/proveedores`): change, revoke and
+  bulk-reconfirm rules
+
 ### Removed
 - Form 104 field matching (ADR-016, supersedes ADR-015): the admin form
   import (`/admin/formularios`), the PDF field extractor and the

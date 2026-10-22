@@ -334,12 +334,26 @@ synchronous within the request — revisit once a period's supplier count
 makes that slow ([`NEXT_STEPS.md`](../../NEXT_STEPS.md)).
 
 **`applyManualClassification()`** — manual classification, single or in
-bulk:
-1. Updates `iva_category` and `processing_status = PROCESSED`.
+bulk ([ADR-017](../adr/017-conocimiento-y-reglas-de-proveedores.md)):
+1. Updates `iva_category` and `processing_status = PROCESSED` on the
+   **selected vouchers only** (source `USER`).
 2. Writes an event to `classification_events`.
-3. Creates or updates the supplier rule (level 1) — the feedback loop:
-   what's corrected today applies on its own (no AI) in the following
-   period.
+3. Creates or updates the supplier rule (level 1) **only if the user ticked
+   "Aplicar a todos los comprobantes de este proveedor"**. A supplier often
+   sells both business and personal things, so a single decision no longer
+   classifies the rest. If the supplier has an active rule with a different
+   category, classifying a voucher differently revokes that rule (mixed
+   use) and says so in the event's reason.
+
+**Supplier rules screen** (`/[taxpayerId]/proveedores`, button in the
+taxpayer's top strip): lists the taxpayer's active rules, lets the user
+change or revoke each one, and reconfirm in bulk the ones issued under an
+older activity fingerprint ("Por reconfirmar"; those are not applied, and
+no longer stop the AI from being asked). Changing or revoking a rule never
+touches vouchers it already classified.
+
+**No-AI mode** is read from `users.ai_enabled` in `classifyPeriod()`; with
+it off (or no provider key) the cascade goes straight from rules to review.
 
 ## 4. Pre-filing
 

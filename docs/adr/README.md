@@ -13,8 +13,8 @@ the point.
 | [002](002-postgresql-propio-en-lugar-de-supabase.md) | Self-hosted PostgreSQL instead of Supabase | Accepted |
 | [003](003-usuario-como-tenant-con-tabla-de-union.md) | The user is the tenant, with a join table | Accepted |
 | [004](004-rls-por-usuario-con-prisma.md) | Row-Level Security per user with Prisma | Accepted |
-| [005](005-clasificacion-en-cascada.md) | Four-level classification cascade | Accepted |
-| [006](006-reglas-por-proveedor-y-actividad-economica.md) | Rules by supplier and economic activity | Accepted |
+| [005](005-clasificacion-en-cascada.md) | Four-level classification cascade | Partially superseded by 017 |
+| [006](006-reglas-por-proveedor-y-actividad-economica.md) | Rules by supplier and economic activity | Partially superseded by 017 |
 | [007](007-modo-sin-ia-y-catalogo-compartido.md) | No-AI mode and shared catalog | Accepted |
 | [008](008-solo-totales-sin-detalle-de-lineas.md) | Totals only, no line-item detail | Accepted |
 | [009](009-clave-de-acceso-como-clave-de-deduplicacion.md) | Access key as the deduplication key | Accepted |
@@ -25,3 +25,4 @@ the point.
 | [014](014-caracter-asistivo-y-disclaimers.md) | The system's assistive character | Accepted |
 | [015](015-definicion-del-formulario-desde-pdf.md) | Form definition imported from PDF | Superseded by 016 |
 | [016](016-resultados-sin-casilleros-del-formulario.md) | Results are not mapped to Form 104 fields | Accepted |
+| [017](017-conocimiento-y-reglas-de-proveedores.md) | Supplier knowledge and rules | Accepted (phase 1 done) |

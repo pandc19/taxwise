@@ -1,5 +1,7 @@
 # ADR-006: Rules by supplier and economic activity
 
+> **Partially superseded (2026-10-22) by [ADR-017](017-conocimiento-y-reglas-de-proveedores.md):** rules are now created only on request, and stale rules no longer block the AI. The rest stands.
+
 ## Status
 Accepted
 
