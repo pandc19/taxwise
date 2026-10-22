@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Calendar, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -104,7 +103,8 @@ export function PeriodsClient({
 
   return (
     <div>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <h1 className="text-3xl font-semibold">{t('title')}</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>{t('newButton')}</Button>
@@ -154,27 +154,27 @@ export function PeriodsClient({
       </div>
 
       {periods.length === 0 ? (
-        <p className="text-muted-foreground">{t('emptyState')}</p>
+        <div className="rounded-lg border border-dashed border-foreground/25 px-6 py-14 text-center text-muted-foreground">
+          {t('emptyState')}
+        </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <ul className="settle divide-y divide-border overflow-hidden rounded-lg border bg-card">
           {periods.map((period) => {
             const date = new Date(period.periodStart);
             const monthNum = date.getUTCMonth() + 1;
             return (
-              <Card key={period.id} className="transition-shadow hover:shadow-md">
-                <CardHeader className="flex-row items-center justify-between gap-2">
+              <li key={period.id}>
+                <div className="group relative flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-accent/60">
                   <Link
                     href={`/${taxpayerId}/periods/${period.id}`}
-                    className="flex min-w-0 flex-1 items-center gap-2 group"
+                    className="flex min-w-0 flex-1 items-baseline gap-2 after:absolute after:inset-0"
                   >
-                    <Calendar className="size-4 shrink-0 text-muted-foreground" />
-                    <CardTitle className="truncate text-base group-hover:underline">
-                      {t(`months.${monthNum}`)} {date.getUTCFullYear()}
-                    </CardTitle>
+                    <span className="text-base font-semibold">{t(`months.${monthNum}`)}</span>
+                    <span className="text-muted-foreground tabular-nums">{date.getUTCFullYear()}</span>
                   </Link>
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="relative z-10 flex shrink-0 items-center gap-2">
                     {period.status === 'FILED' ? (
-                      <Badge variant="outline">{t('statusOptions.FILED')}</Badge>
+                      <Badge>{t('statusOptions.FILED')}</Badge>
                     ) : (
                       <Select
                         value={period.status}
@@ -193,7 +193,7 @@ export function PeriodsClient({
                     )}
                     {period.status === 'DRAFT' && (
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon-sm"
                         title={common('delete')}
                         aria-label={common('delete')}
@@ -203,18 +203,18 @@ export function PeriodsClient({
                       </Button>
                     )}
                   </div>
-                </CardHeader>
+                </div>
                 {rowErrors[period.id] && (
-                  <CardContent className="pt-0">
+                  <div className="px-5 pb-3">
                     <Alert variant="destructive">
                       <AlertDescription>{rowErrors[period.id]}</AlertDescription>
                     </Alert>
-                  </CardContent>
+                  </div>
                 )}
-              </Card>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
     </div>
   );

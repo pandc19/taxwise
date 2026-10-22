@@ -41,7 +41,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-sm items-center px-4">
+    <div className="mx-auto flex min-h-screen w-full max-w-sm items-center px-4">
       <Card className="w-full">
         <CardHeader>
           <CardTitle>{t('loginTitle')}</CardTitle>

@@ -35,8 +35,8 @@ export function BackBar({ label }: { label: string }) {
   if (!parent) return null;
 
   return (
-    <div className="border-b bg-background">
-      <div className="mx-auto flex max-w-5xl items-center px-4 py-2 pl-16 md:pl-4">
+    <div>
+      <div className="mx-auto flex max-w-5xl items-center px-6 pt-5 pl-16 md:pl-6">
         <Link
           href={parent}
           className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"

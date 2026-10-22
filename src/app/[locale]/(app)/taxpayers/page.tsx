@@ -1,8 +1,7 @@
 import { getTranslations } from 'next-intl/server';
-import { Building2, Calendar, SquarePen } from 'lucide-react';
+import { ChevronRight, SquarePen } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getMyTaxpayers } from './actions';
 
@@ -11,63 +10,57 @@ export default async function TaxpayersPage() {
   const taxpayers = await getMyTaxpayers();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
+    <div className="mx-auto max-w-4xl px-6 py-10">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <h1 className="text-3xl font-semibold">{t('title')}</h1>
+        {taxpayers.length > 0 && (
+          <Button asChild>
+            <Link href="/taxpayers/new">{t('newButton')}</Link>
+          </Button>
+        )}
+      </div>
 
       {taxpayers.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-            <p className="text-muted-foreground">{t('emptyState')}</p>
-            <Link href="/taxpayers/new">
-              <Button>{t('emptyStateCta')}</Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="rounded-lg border border-dashed border-foreground/25 px-6 py-16 text-center">
+          <p className="mx-auto mb-5 max-w-sm text-muted-foreground">{t('emptyState')}</p>
+          <Button asChild>
+            <Link href="/taxpayers/new">{t('emptyStateCta')}</Link>
+          </Button>
+        </div>
       ) : (
-        <>
-          <div className="mb-4 flex justify-end">
-            <Link href="/taxpayers/new">
-              <Button>{t('newButton')}</Button>
-            </Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {taxpayers.map((taxpayer) => (
-              <Card key={taxpayer.id} className="transition-shadow hover:shadow-md">
-                <CardHeader className="flex-row items-start justify-between gap-2">
-                  <Link href={`/${taxpayer.id}/periods`} className="min-w-0 flex-1 group">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="size-4 shrink-0 text-muted-foreground" />
-                      <CardTitle className="truncate text-base group-hover:underline">
-                        {taxpayer.businessName}
-                      </CardTitle>
-                    </div>
-                  </Link>
-                  <div className="flex shrink-0 gap-1">
-                    <Link href={`/${taxpayer.id}/periods`} title={t('periodsLink')}>
-                      <Button variant="outline" size="icon-sm" aria-label={t('periodsLink')}>
-                        <Calendar className="size-4" />
-                      </Button>
-                    </Link>
-                    <Link href={`/${taxpayer.id}/edit`} title={t('navEdit')}>
-                      <Button variant="outline" size="icon-sm" aria-label={t('navEdit')}>
-                        <SquarePen className="size-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    {t('ruc')}: {taxpayer.ruc}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <Badge variant="secondary">{t(`regimeOptions.${taxpayer.regime}`)}</Badge>
-                    <Badge variant="outline">{t(`periodicityOptions.${taxpayer.ivaPeriodicity}`)}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </>
+        <ul className="settle divide-y divide-border overflow-hidden rounded-lg border bg-card">
+          {taxpayers.map((taxpayer) => (
+            <li key={taxpayer.id} className="group relative flex items-center gap-4 px-5 py-4 transition-colors hover:bg-accent/60">
+              <div className="min-w-0 flex-1">
+                <Link
+                  href={`/${taxpayer.id}/periods`}
+                  className="block truncate text-base font-semibold after:absolute after:inset-0"
+                >
+                  {taxpayer.businessName}
+                </Link>
+                <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
+                  {t('ruc')} {taxpayer.ruc}
+                </p>
+              </div>
+              <div className="hidden shrink-0 gap-1.5 sm:flex">
+                <Badge variant="secondary">{t(`regimeOptions.${taxpayer.regime}`)}</Badge>
+                <Badge variant="outline">{t(`periodicityOptions.${taxpayer.ivaPeriodicity}`)}</Badge>
+              </div>
+              <Button
+                asChild
+                variant="ghost"
+                size="icon-sm"
+                className="relative z-10"
+                title={t('navEdit')}
+              >
+                <Link href={`/${taxpayer.id}/edit`} aria-label={t('navEdit')}>
+                  <SquarePen className="size-4" />
+                </Link>
+              </Button>
+              <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

@@ -1,6 +1,5 @@
-import { Upload, Receipt, ListChecks, FileCheck } from 'lucide-react';
+import { ChevronRight, Upload, Receipt, ListChecks, FileCheck } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface StepCard {
   key: 'ingestion' | 'sales' | 'reconciliation' | 'pre-filing';
@@ -72,31 +71,43 @@ export function PeriodOverview({
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold">{labels.heading}</h2>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {steps.map((step, i) => (
-          <Link key={step.key} href={step.href}>
-            <Card
-              className={
-                i === 0 && !hasData
-                  ? 'h-full border-primary transition-colors hover:border-primary hover:bg-accent'
-                  : 'h-full transition-colors hover:border-primary hover:bg-accent'
-              }
-            >
-              <CardHeader>
-                <step.Icon className="mb-2 size-6 text-primary" />
-                <CardTitle className="flex items-center gap-2 text-base">
-                  {i + 1}. {step.title}
-                  {i === 0 && !hasData && (
-                    <span className="text-xs font-normal text-primary">{labels.startHere}</span>
-                  )}
-                </CardTitle>
-                <CardDescription>{step.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      <h2 className="mb-5 text-lg font-semibold text-muted-foreground">{labels.heading}</h2>
+      <ol className="settle divide-y divide-border overflow-hidden rounded-lg border bg-card">
+        {steps.map((step, i) => {
+          const highlight = i === 0 && !hasData;
+          return (
+            <li key={step.key}>
+              <Link
+                href={step.href}
+                className="group flex items-center gap-5 px-5 py-5 transition-colors hover:bg-accent/60"
+              >
+                <span
+                  className={
+                    highlight
+                      ? 'flex size-11 shrink-0 items-center justify-center rounded-md bg-signal text-signal-foreground'
+                      : 'flex size-11 shrink-0 items-center justify-center rounded-md bg-secondary text-secondary-foreground'
+                  }
+                >
+                  <step.Icon className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline gap-2 text-base font-semibold">
+                    <span className="text-muted-foreground tabular-nums">{i + 1}.</span>
+                    {step.title}
+                    {highlight && (
+                      <span className="rounded-sm bg-signal px-1.5 py-0.5 text-xs font-medium text-signal-foreground">
+                        {labels.startHere}
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-1 block text-sm text-muted-foreground">{step.description}</span>
+                </span>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

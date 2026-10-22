@@ -1,8 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Building2, Calendar, SquarePen, Store } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
-import { Button } from '@/components/ui/button';
 import { getTaxpayer } from './actions';
+import { TaxpayerTabs } from './taxpayer-tabs';
 
 export default async function TaxpayerLayout({
   children,
@@ -17,28 +15,22 @@ export default async function TaxpayerLayout({
 
   return (
     <div>
-      <div className="border-b bg-card shadow-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <Building2 className="size-5 shrink-0 text-muted-foreground" />
-            <span className="truncate font-semibold">{taxpayer.businessName}</span>
+      <div className="border-b bg-card">
+        <div className="mx-auto max-w-5xl px-6 pt-5">
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <h2 className="min-w-0 truncate text-xl font-semibold">{taxpayer.businessName}</h2>
+            <span className="text-sm text-muted-foreground tabular-nums">
+              {t('ruc')} {taxpayer.ruc}
+            </span>
           </div>
-          <div className="flex shrink-0 gap-1">
-            <Link href={`/${taxpayerId}/periods`} title={t('navPeriods')}>
-              <Button variant="ghost" size="icon-sm" aria-label={t('navPeriods')}>
-                <Calendar className="size-4" />
-              </Button>
-            </Link>
-            <Link href={`/${taxpayerId}/suppliers`} title={t('navSuppliers')}>
-              <Button variant="ghost" size="icon-sm" aria-label={t('navSuppliers')}>
-                <Store className="size-4" />
-              </Button>
-            </Link>
-            <Link href={`/${taxpayerId}/edit`} title={t('navEdit')}>
-              <Button variant="ghost" size="icon-sm" aria-label={t('navEdit')}>
-                <SquarePen className="size-4" />
-              </Button>
-            </Link>
+          <div className="mt-3">
+            <TaxpayerTabs
+              tabs={[
+                { href: `/${taxpayerId}/periods`, label: t('navPeriods') },
+                { href: `/${taxpayerId}/suppliers`, label: t('navSuppliers') },
+                { href: `/${taxpayerId}/edit`, label: t('navEditShort') },
+              ]}
+            />
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 {
   "Common": {
+    "authTagline": "Tu IVA del mes, calculado a partir de tus comprobantes.",
     "appName": "taxap",
     "back": "Volver",
     "deleteConfirm": "¿Eliminar? No se puede deshacer.",
@@ -25,6 +26,7 @@
     "periodicity": "Periodicidad",
     "periodsLink": "Ver períodos →",
     "navPeriods": "Períodos",
+    "navEditShort": "Datos del contribuyente",
     "navSuppliers": "Proveedores",
     "navEdit": "Editar contribuyente",
     "editTitle": "Editar contribuyente",
