@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { withUser } from '@/lib/db';
 import { getCurrentUserId } from '@/lib/session';
 import { computeActivityFingerprint } from '@/domain/iva';
+import { normalizeWorkProfile } from '@/lib/work-profile-input';
+import type { WorkProfileInput } from '@/lib/work-profile-input';
 import type { TaxRegime, Periodicity } from '@prisma/client';
 
 export async function getTaxpayer(taxpayerId: string) {
@@ -11,7 +13,7 @@ export async function getTaxpayer(taxpayerId: string) {
   return withUser(userId, (tx) => tx.taxpayer.findUniqueOrThrow({ where: { id: taxpayerId } }));
 }
 
-export interface UpdateTaxpayerInput {
+export interface UpdateTaxpayerInput extends WorkProfileInput {
   ruc: string;
   businessName: string;
   tradeName?: string;
@@ -50,6 +52,7 @@ export async function updateTaxpayer(
           ivaPeriodicity: input.ivaPeriodicity,
           economicActivities: input.economicActivities,
           activityFingerprint,
+          ...normalizeWorkProfile(input),
         },
       });
     });

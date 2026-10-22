@@ -25,4 +25,4 @@ the point.
 | [014](014-caracter-asistivo-y-disclaimers.md) | The system's assistive character | Accepted |
 | [015](015-definicion-del-formulario-desde-pdf.md) | Form definition imported from PDF | Superseded by 016 |
 | [016](016-resultados-sin-casilleros-del-formulario.md) | Results are not mapped to Form 104 fields | Accepted |
-| [017](017-conocimiento-y-reglas-de-proveedores.md) | Supplier knowledge and rules | Accepted (phase 1 done) |
+| [017](017-conocimiento-y-reglas-de-proveedores.md) | Supplier knowledge and rules | Accepted |

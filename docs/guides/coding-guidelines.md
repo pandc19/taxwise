@@ -96,7 +96,10 @@ See [ADR-012](../adr/012-tasas-y-casilleros-como-datos-con-vigencia.md).
 
 ## Classification
 
-- The AI query is **per supplier**, not per voucher.
+- The AI query is **per supplier**, not per voucher, and it answers
+  whether the supplier relates to the taxpayer's work -- never credit vs.
+  expense, which comes from the taxpayer's own setting
+  ([ADR-017](../adr/017-conocimiento-y-reglas-de-proveedores.md)).
 - RUC and taxpayer name are never sent to the AI.
 - Every verdict records `classification_source`, `rules_version`, and
   —if AI— `model_id` and `prompt_version`.

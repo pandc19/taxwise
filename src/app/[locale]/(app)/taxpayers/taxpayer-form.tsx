@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { TYPICAL_EXPENSES, WORK_SETUPS } from '@/domain/iva';
+import { WORK_DESCRIPTION_MAX } from '@/lib/work-profile-input';
 import {
   Select,
   SelectContent,
@@ -29,6 +32,10 @@ export interface TaxpayerFormValues {
   regime: string;
   ivaPeriodicity: string;
   economicActivities: ActivityRow[];
+  workDescription: string;
+  workSetup: string[];
+  typicalExpenses: string[];
+  purchaseTreatment: string;
 }
 
 const emptyValues: TaxpayerFormValues = {
@@ -38,6 +45,10 @@ const emptyValues: TaxpayerFormValues = {
   regime: 'GENERAL',
   ivaPeriodicity: 'MONTHLY',
   economicActivities: [{ code: '', description: '' }],
+  workDescription: '',
+  workSetup: [],
+  typicalExpenses: [],
+  purchaseTreatment: 'CLAIM_CREDIT',
 };
 
 export function TaxpayerForm({
@@ -62,6 +73,13 @@ export function TaxpayerForm({
       economicActivities: prev.economicActivities.map((activity, i) =>
         i === index ? { ...activity, [field]: value } : activity
       ),
+    }));
+  }
+
+  function toggleOption(field: 'workSetup' | 'typicalExpenses', option: string, checked: boolean) {
+    setValues((prev) => ({
+      ...prev,
+      [field]: checked ? [...prev[field], option] : prev[field].filter((o) => o !== option),
     }));
   }
 
@@ -101,6 +119,10 @@ export function TaxpayerForm({
       regime: values.regime as 'GENERAL' | 'RIMPE_POPULAR' | 'RIMPE_EMPRENDEDOR',
       ivaPeriodicity: values.ivaPeriodicity as 'MONTHLY' | 'SEMIANNUAL' | 'ANNUAL',
       economicActivities,
+      workDescription: values.workDescription,
+      workSetup: values.workSetup,
+      typicalExpenses: values.typicalExpenses,
+      purchaseTreatment: values.purchaseTreatment as 'CLAIM_CREDIT' | 'DEDUCT_AS_EXPENSE',
     };
 
     const result =
@@ -221,6 +243,70 @@ export function TaxpayerForm({
           {t('addActivity')}
         </Button>
       </div>
+
+      <fieldset className="space-y-4 rounded-md border p-4">
+        <legend className="px-1 text-sm font-medium">{t('workHeading')}</legend>
+        <p className="text-sm text-muted-foreground">{t('workIntro')}</p>
+
+        <div className="space-y-2">
+          <Label htmlFor="workDescription">{t('workDescription')}</Label>
+          <Input
+            id="workDescription"
+            value={values.workDescription}
+            maxLength={WORK_DESCRIPTION_MAX}
+            placeholder={t('workDescriptionPlaceholder')}
+            onChange={(e) => setValues((v) => ({ ...v, workDescription: e.target.value }))}
+          />
+          <p className="text-xs text-muted-foreground">{t('workDescriptionHint')}</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t('workSetup')}</Label>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {WORK_SETUPS.map((option) => (
+              <label key={option} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={values.workSetup.includes(option)}
+                  onCheckedChange={(checked) => toggleOption('workSetup', option, checked === true)}
+                />
+                {t(`workSetupOptions.${option}`)}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t('typicalExpenses')}</Label>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {TYPICAL_EXPENSES.map((option) => (
+              <label key={option} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={values.typicalExpenses.includes(option)}
+                  onCheckedChange={(checked) => toggleOption('typicalExpenses', option, checked === true)}
+                />
+                {t(`typicalExpensesOptions.${option}`)}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>{t('purchaseTreatment')}</Label>
+          <Select
+            value={values.purchaseTreatment}
+            onValueChange={(purchaseTreatment) => setValues((v) => ({ ...v, purchaseTreatment }))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CLAIM_CREDIT">{t('purchaseTreatmentOptions.CLAIM_CREDIT')}</SelectItem>
+              <SelectItem value="DEDUCT_AS_EXPENSE">{t('purchaseTreatmentOptions.DEDUCT_AS_EXPENSE')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">{t('purchaseTreatmentNotice')}</p>
+        </div>
+      </fieldset>
 
       {error && (
         <Alert variant="destructive">

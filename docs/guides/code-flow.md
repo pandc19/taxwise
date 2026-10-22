@@ -103,6 +103,9 @@ to `/login` without one. There are no more demo routes with fixed ids.
 - `/taxpayers` lists the user's taxpayers (via `user_taxpayers`,
   filtered by RLS) and leads to `/taxpayers/new`, `/[taxpayerId]/periodos`,
   or `/[taxpayerId]/editar`.
+- The taxpayer form also asks about their work (a short description,
+  how they work, what they typically buy for work) and how to treat the IVA
+  of purchases related to it (`purchase_treatment`); see Reconciliation.
 - `createTaxpayer()`/`updateTaxpayer()` compute `activityFingerprint` with
   `computeActivityFingerprint()` (`domain/iva/activity-fingerprint.ts` —
   a hash of the sorted economic activities, ADR-006) every time
@@ -256,14 +259,30 @@ earlier run) by supplier and runs the
 ([ADR-005](../adr/005-clasificacion-en-cascada.md)):
 
 ```
-┌─ Level 1 ── supplier_rules (taxpayer, supplier) — not revoked
+┌─ Level 1 ── the user's own supplier rule (current activity fingerprint)
 │             ↓ no match
-├─ Level 2 ── shared catalog (requires 3+ in agreement) — []  not implemented yet, ADR-007
+├─ Level 2 ── an earlier AI answer for the same activities + work profile
+│             (a supplier_rules row with source = AI)
 │             ↓ no match
-├─ Level 3 ── AI (src/services/ai/) — null in no-AI mode, ADR-007
+├─ Level 3 ── the supplier's kind matches something the user buys for work
+│             (supplier_profiles × taxpayers.typical_expenses; never for a
+│             mixed-use supplier, or one the AI doesn't recognise: profile
+│             confidence < 0.70)
 │             ↓ no match
-└─ Level 4 ── manual review queue (processing_status = REQUIRES_MANUAL_REVIEW)
+├─ Level 4 ── AI relevance answer (src/services/ai/) — null in no-AI mode
+│             (mixed-use suppliers: never)
+│             ↓ no match
+└─ Review ─── manual queue (processing_status = REQUIRES_MANUAL_REVIEW)
 ```
+
+The cascade decides only whether a supplier **relates to the taxpayer's
+work** (`RELATED` / `NOT_RELATED`). The stored category is then derived from
+the taxpayer's own `purchase_treatment` — `CLAIM_CREDIT` gives `CREDIT`,
+`DEDUCT_AS_EXPENSE` gives `COST_EXPENSE`, not related gives
+`NON_DEDUCTIBLE` — so the AI never decides credit
+([ADR-017](../adr/017-conocimiento-y-reglas-de-proveedores.md)). Changing
+`purchase_treatment` is followed by "Reclasificar todo" on each open period;
+vouchers decided by the user keep their category.
 
 **Classifying again.** `classifyPeriod(taxpayerId, periodId, options)`
 takes `{ reclassify: true }` ("Reclasificar todo": every voucher whose
@@ -291,42 +310,53 @@ supplier to manual review without going through the cascade
 (`requiresManualReview()`, which uses the single boolean ingestion
 already computed — there's no separate second list of "standard types").
 
-**Level 3 (AI)** only runs when levels 1-2 wouldn't already decide —
-calling it after a supplier rule already matched would just be unused
-cost. `getAiClassifier()` (`src/services/ai/index.ts`) reads
-`AI_PROVIDER` (`claude` or `openai`, default `claude`) and returns
-`null` if that provider's key isn't set — the same no-AI-mode fallback
-as before, now reached through a real switch instead of a permanent
-stub. `ClaudeClassifier` and `OpenAiClassifier`
-(`src/services/ai/providers/`) implement the same `AiClassifier`
-interface: ask the bulk model first (`CLAUDE_BULK_MODEL`, default
-`claude-haiku-4-5` per CLAUDE.md's model table; `OPENAI_BULK_MODEL`,
-default `gpt-4o-mini`, for the other provider), and only escalate to the
-stronger model (`CLAUDE_ESCALATION_MODEL`/`OPENAI_ESCALATION_MODEL`,
-defaults `claude-opus-5`/`gpt-4o`) when the bulk answer's confidence is
-below 0.80 — the same bar
-`classification-cascade.ts`'s `level3_aiSuggestion()` requires to accept
-it. Both use structured output (Zod schema via each SDK's own helper),
-never prose parsing. The request sent to either provider carries only
-the *supplier's* RUC, name, and document type plus the *buyer's* economic
-activities (all of them, code and description) and tax regime — never the
-taxpayer's own RUC or name (ADR-007, "Data minimization"). The buyer's
-activity is what lets the model say a grocery store doesn't fit a
-professional-services business; without it every ordinary-looking company
-came back as `CREDIT` (prompt `supplier-classification-v2`). A `classification_events` row for a supplier the AI was consulted about
-records `model_id`, `prompt_version`, `ai_confidence` and `ai_reasoning`
-(also when the answer was below 0.80 and the voucher went to review, so
-the row explains why; the Conciliación table shows the latest one in an
-info dialog next to each voucher's classification, via `getAiNotes()`).
-The prompt text itself isn't stored: it lives in
-code and `prompt_version` points to it
-(`PROMPT_VERSION` in `src/services/ai/types.ts`, bumped whenever the
+**The AI** only runs when levels 1–3 wouldn't already decide, and asks two
+separate questions (`src/services/ai/`):
+
+1. *What is this supplier?* — `profileSupplier()`: one call per RUC, to the
+   strong model (`OPENAI_PROFILE_MODEL` / `CLAUDE_PROFILE_MODEL`, default the
+   escalation model — it is world knowledge, asked once and shared), answer
+   stored globally in `supplier_profiles` (kinds, a one-line summary, a
+   `mixed_use` flag, confidence, model and prompt version). It carries only
+   the supplier's RUC and name — no buyer information — and is repeated only
+   when the prompt version changes (profiles written by an older version are
+   asked again on the next run). `mixed_use` is strict: only hardware and
+   building-materials stores, general retail and fuel stations.
+2. *Does it relate to this taxpayer's work?* — `judgeRelevance()`: carries the
+   stored profile plus the buyer's economic activities, regime, work
+   description, work setup and typical expenses — never the taxpayer's RUC or
+   name (ADR-007). An accepted answer (confidence ≥ 0.80, not `UNSURE`) is
+   stored as a `supplier_rules` row with `source = AI`, together with its
+   reasoning, model and prompt version, so the same supplier is decided the
+   same way next period until the activities or work profile change
+   (`computeWorkProfileHash()`); it never overwrites one of the user's own
+   rules.
+
+`getAiClassifier()` (`src/services/ai/index.ts`) reads `AI_PROVIDER`
+(`claude` or `openai`, default `claude`) and returns `null` if that
+provider's key isn't set (or `users.ai_enabled` is off, checked by
+`classifyPeriod()`) — the no-AI mode of ADR-007. `ClaudeClassifier` and
+`OpenAiClassifier` (`src/services/ai/providers/`) implement the same
+`AiClassifier` interface: ask the bulk model first (`CLAUDE_BULK_MODEL`,
+default `claude-haiku-4-5` per CLAUDE.md's model table; `OPENAI_BULK_MODEL`,
+default `gpt-4o-mini`), and escalate to the stronger model
+(`CLAUDE_ESCALATION_MODEL`/`OPENAI_ESCALATION_MODEL`, defaults
+`claude-opus-5`/`gpt-4o`) when confidence is below 0.80 — the cascade's own
+acceptance bar. Both use structured output (Zod schema via each SDK's own
+helper), never prose parsing. A `classification_events` row for a supplier
+the AI was consulted about records `model_id`, `prompt_version`,
+`ai_confidence` and `ai_reasoning` (also when the answer was below 0.80 and
+the voucher went to review, and for a remembered answer, copied from the
+rule), and the Conciliación table shows it in an info dialog via
+`getAiNotes()`. The prompt text itself isn't stored: it lives in code and
+`prompt_version` points to it (`PROFILE_PROMPT_VERSION` and
+`RELEVANCE_PROMPT_VERSION` in `src/services/ai/types.ts`, bumped whenever a
 prompt's wording or schema changes).
 
 **Not yet done:** the Batch API pass CLAUDE.md's model table calls for
 ("Batch API para el pase masivo"). `classifyPeriod()` runs in three
 phases so no AI call sits inside a DB transaction (Prisma's 5 s limit
-expired it with ~23 suppliers): (1) read vouchers, taxpayer and rules in
+expired it with ~23 suppliers): (1) read vouchers, taxpayer, rules and supplier profiles in
 one transaction; (2) ask the AI per supplier, 5 at a time, outside any
 transaction (a failure is counted and reported, not thrown); (3) decide
 and write with `updateMany`/`createMany` in one short transaction. Still

@@ -44,13 +44,15 @@ interface PurchaseRow {
   issueDate: string;
   series: string;
   aiNote: { confidence: string; reasoning: string; modelId: string } | null;
+  supplierProfile: { summary: string; kinds: string[]; mixedUse: boolean; unknown: boolean } | null;
 }
 
 type Tab = 'UNCLASSIFIED' | 'CREDIT' | 'COST_EXPENSE' | 'NON_DEDUCTIBLE' | 'PENDING' | 'NO_VAT';
 
 // Who decided a voucher's category: the AI, the user (by hand), or a rule
 // the user's earlier manual decision created (ADR-006).
-const SOURCE_KEYS: Partial<Record<ClassificationSourceType, 'sourceAi' | 'sourceUser' | 'sourceRule' | 'sourceCatalog'>> = {
+const SOURCE_KEYS: Partial<Record<ClassificationSourceType, 'sourceAi' | 'sourceUser' | 'sourceRule' | 'sourceCatalog' | 'sourceDeterministic'>> = {
+  DETERMINISTIC: 'sourceDeterministic',
   AI: 'sourceAi',
   USER: 'sourceUser',
   RULE: 'sourceRule',
@@ -359,7 +361,7 @@ export function ConciliacionTable({
                         {t(SOURCE_KEYS[p.classificationSource]!)}
                       </Badge>
                     )}
-                    {p.aiNote && (
+                    {(p.aiNote || p.supplierProfile) && (
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -390,17 +392,39 @@ export function ConciliacionTable({
           <DialogHeader>
             <DialogTitle>{t('aiDetailTitle')}</DialogTitle>
           </DialogHeader>
-          {detail?.aiNote && (
+          {detail && (
             <div className="space-y-3 text-sm">
               <p className="font-medium">
                 {detail.supplierName} · {detail.supplierRuc}
               </p>
-              <p className="text-muted-foreground">
-                {t('aiConfidence')}: {Math.round(parseFloat(detail.aiNote.confidence) * 100)}% ·{' '}
-                {detail.aiNote.modelId}
-              </p>
-              <p className="whitespace-pre-line">{detail.aiNote.reasoning}</p>
-              <p className="text-xs text-muted-foreground">{t('aiDetailFootnote')}</p>
+              {detail.supplierProfile && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">{t('supplierProfileHeading')}</p>
+                  <p>{detail.supplierProfile.summary}</p>
+                  {detail.supplierProfile.unknown ? (
+                    <p className="text-muted-foreground">{t('unknownSupplierNotice')}</p>
+                  ) : (
+                    detail.supplierProfile.mixedUse && (
+                      <p className="text-muted-foreground">{t('mixedUseNotice')}</p>
+                    )
+                  )}
+                </div>
+              )}
+              {detail.aiNote ? (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">{t('relevanceHeading')}</p>
+                  <p className="text-muted-foreground">
+                    {t('aiConfidence')}: {Math.round(parseFloat(detail.aiNote.confidence) * 100)}% ·{' '}
+                    {detail.aiNote.modelId}
+                  </p>
+                  <p className="whitespace-pre-line">{detail.aiNote.reasoning}</p>
+                  <p className="text-xs text-muted-foreground">{t('aiDetailFootnote')}</p>
+                </div>
+              ) : (
+                !detail.supplierProfile?.mixedUse && !detail.supplierProfile?.unknown && (
+                  <p className="text-muted-foreground">{t('noAiAnswer')}</p>
+                )
+              )}
             </div>
           )}
         </DialogContent>

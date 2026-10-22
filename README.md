@@ -19,12 +19,13 @@ portal.
 
 1. **Ingestion** — upload of the SRI's `.txt` files for received and issued
    vouchers, with integrity validation and deduplication by access key.
-2. **Classification** — a deterministic cascade (learned rules → shared
-   catalog → optional AI → manual review) that assigns each purchase its
-   VAT treatment.
+2. **Classification** — a cascade (the user's rules → remembered AI answers
+   → what the supplier sells vs. what the user buys for work → optional AI
+   → manual review) that decides whether each purchase relates to the
+   taxpayer's work; its IVA treatment follows the taxpayer's own setting.
 3. **Reconciliation** — an inbox where the user approves, reassigns, or
-   excludes whatever the system couldn't resolve with confidence. Each
-   decision becomes a rule.
+   excludes whatever the system couldn't resolve with confidence. A
+   decision can optionally become a rule for that supplier.
 4. **Pre-filing** — totals of sales and of purchases that can count toward
    IVA credit, with a breakdown traceable down to the individual invoice.
 

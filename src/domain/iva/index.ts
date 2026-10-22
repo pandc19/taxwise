@@ -26,13 +26,28 @@ export type {
 } from './proportionality';
 
 // Classification Cascade
-export { classificationCascade, requiresManualReview } from './classification-cascade';
+export {
+  classificationCascade,
+  requiresManualReview,
+  categoryFor,
+  AI_ACCEPTANCE_THRESHOLD,
+  PROFILE_MIN_CONFIDENCE,
+} from './classification-cascade';
 export type {
   ClassificationInput,
   ClassificationDecision,
   SupplierRule,
-  CatalogEntry,
+  SupplierFacts,
+  AiRelevanceDecision,
+  Relevance,
+  PurchaseTreatment,
 } from './classification-cascade';
+
+// Supplier knowledge and work profile (ADR-017)
+export { SUPPLIER_KINDS, WORK_SETUPS, TYPICAL_EXPENSES, kindsCoveredBy } from './supplier-kinds';
+export type { SupplierKind, WorkSetup, TypicalExpense } from './supplier-kinds';
+export { computeWorkProfileHash } from './work-profile';
+export type { WorkProfile } from './work-profile';
 
 // Calculator
 export { calculatePeriodResults } from './calculator';

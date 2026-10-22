@@ -5,6 +5,55 @@ Imperative mood: "Add", not "Added".
 
 ## [Unreleased]
 
+### Added
+- Supplier profiles (ADR-017): what a supplier is is asked once per RUC and
+  stored globally (`supplier_profiles`: kinds, summary, `mixed_use`)
+- Taxpayer "Tu trabajo" section: what they do, how they work, what they
+  typically buy for work, and how to treat the IVA of related purchases
+  (`purchase_treatment`)
+- AI answers are remembered as supplier rules (`source = AI`), so a supplier
+  is decided the same way every period until the activities or work profile
+  change
+
+### Fixed
+- Reclassifying now withdraws an earlier engine result when the supplier is
+  now known to need the user (mixed-use, or one the AI doesn't recognise),
+  and drops a remembered AI answer that a new run could not renew; the info
+  dialog only shows the engine's latest AI answer
+- The relevance prompt listed every possible "typical expense" next to the
+  buyer's own choices, so the model treated unselected options as stated
+  (Banco del Pacífico came back related "because they mention bank payment
+  fees" when the taxpayer hadn't ticked them). Prompt `relevance-v2` lists
+  only what the buyer chose; remembered AI answers are tied to the prompt
+  version, so they are all asked again
+- A supplier the AI doesn't recognise (profile confidence < 0.70) is no
+  longer judged from a guess: CORPSAEV (Panini) was profiled as
+  "professional services" at 0.30 confidence and then accepted as related to
+  work at 0.85. Such suppliers now go to review with that explanation, and a
+  remembered AI answer that rested on such a profile is revoked
+- Supplier profiles are asked of the strong model (`*_PROFILE_MODEL`, default
+  the escalation model) instead of the small one, which confused a steel
+  supplier with a computer shop; profiles from the earlier prompt are
+  refreshed (`supplier-profile-v3`)
+- Supplier profiles flagged far too many suppliers as mixed-use (15 of 25 in
+  a first run, including phone and pay-TV providers), sending their vouchers
+  to review unseen. Prompt `supplier-profile-v2` makes `mixed_use` strict
+  (hardware, general retail, fuel); profiles written by an older prompt
+  version are asked again on the next classification
+- The info dialog in Conciliación now also shows what the supplier is and,
+  for mixed-use suppliers or those decided by the user's profile, why no AI
+  answer exists
+
+### Changed
+- The cascade decides whether a supplier *relates to the taxpayer's work*;
+  the category (`CREDIT` / `COST_EXPENSE` / `NON_DEDUCTIBLE`) is derived from
+  `purchase_treatment`. The AI no longer chooses between credit and expense
+- `supplier_rules` stores `relevance` instead of `iva_category` (migration
+  clears existing rules)
+- Suppliers flagged mixed-use are never decided automatically
+- Cascade: user rule → remembered AI answer → supplier kind × what the user
+  buys for work → AI → review
+
 ### Changed
 - Manual classification applies to the selected vouchers only; a supplier
   rule is created only with the new "Aplicar a todos los comprobantes de

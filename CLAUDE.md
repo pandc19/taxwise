@@ -63,6 +63,10 @@ separate action. ([ADR-014](docs/adr/014-caracter-asistivo-y-disclaimers.md))
 | Classifying vouchers with `IVA = 0` | They don't enter the cascade |
 | Keying a rule by supplier alone | It's `(taxpayer, supplier, activity fingerprint)` ([ADR-006](docs/adr/006-reglas-por-proveedor-y-actividad-economica.md)) |
 | Querying the AI per voucher | It's **per supplier** ([ADR-005](docs/adr/005-clasificacion-en-cascada.md)) |
+| Asking the AI to choose between credit and expense | It only says whether a supplier **relates to the taxpayer's work**; the category follows the taxpayer's own `purchase_treatment` ([ADR-017](docs/adr/017-conocimiento-y-reglas-de-proveedores.md)) |
+| Creating a supplier rule from a manual decision | Manual = that voucher only. A rule exists only if the user asks for one, or as a remembered AI answer ([ADR-017](docs/adr/017-conocimiento-y-reglas-de-proveedores.md)) |
+| Letting the AI decide a `mixed_use` supplier | Hardware stores, supermarkets, fuel… are sold to businesses and households alike: its vouchers go to review, or to the user's own rule |
+| Sending the buyer's RUC or name to the AI | Only the supplier's RUC/name, and the buyer's activities and work profile |
 | Sending the taxpayer's RUC or name to the AI | It never leaves the system ([ADR-007](docs/adr/007-modo-sin-ia-y-catalogo-compartido.md)) |
 | Assuming sales without IVA give a factor of zero | **No.** Exports and 0%-rated sales with credit entitlement add to the numerator: factor `1.0000` ([`formulario-104.md`](docs/tax/formulario-104.md)) |
 | Treating the factor as a single number without context | It depends on the destination of each sale with `IVA = 0`, which the file doesn't indicate |
@@ -78,8 +82,8 @@ separate action. ([ADR-014](docs/adr/014-caracter-asistivo-y-disclaimers.md))
 
 | Use | Model |
 |---|---|
-| Bulk classification | `claude-haiku-4-5` |
-| Escalation of ambiguous cases | `claude-opus-5` |
+| Relevance of a supplier to a taxpayer (bulk) | `claude-haiku-4-5` |
+| Escalation of ambiguous cases, and **supplier profiles** (once per RUC, cached globally: knowing who a supplier is needs world knowledge) | `claude-opus-5` |
 
 With structured outputs (`output_config.format`), never by parsing prose. Batch
 API for the bulk pass. Every response logs `model_id` and `prompt_version`.

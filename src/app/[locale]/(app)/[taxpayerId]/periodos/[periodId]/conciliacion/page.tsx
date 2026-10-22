@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getAiNotes, getPurchasesByStatus } from './actions';
+import { getAiNotes, getPurchasesByStatus, getSupplierProfiles } from './actions';
 import { ConciliacionTable } from './conciliacion-table';
 
 export default async function ConciliacionPage({
@@ -9,9 +9,10 @@ export default async function ConciliacionPage({
 }) {
   const { taxpayerId, periodId } = await params;
   const t = await getTranslations('Conciliacion');
-  const [purchases, aiNotes] = await Promise.all([
+  const [purchases, aiNotes, profiles] = await Promise.all([
     getPurchasesByStatus(taxpayerId, periodId),
     getAiNotes(taxpayerId, periodId),
+    getSupplierProfiles(taxpayerId, periodId),
   ]);
 
   return (
@@ -31,6 +32,7 @@ export default async function ConciliacionPage({
           issueDate: p.issueDate.toISOString(),
           series: p.series,
           aiNote: aiNotes.get(p.id) ?? null,
+          supplierProfile: profiles.get(p.supplierRuc) ?? null,
         }))}
         taxpayerId={taxpayerId}
         periodId={periodId}

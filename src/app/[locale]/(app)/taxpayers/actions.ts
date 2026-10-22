@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { withUser } from '@/lib/db';
 import { getCurrentUserId } from '@/lib/session';
 import { computeActivityFingerprint } from '@/domain/iva';
+import { normalizeWorkProfile } from '@/lib/work-profile-input';
+import type { WorkProfileInput } from '@/lib/work-profile-input';
 import type { TaxRegime, Periodicity } from '@prisma/client';
 
 export async function getMyTaxpayers() {
@@ -16,7 +18,7 @@ export async function getMyTaxpayers() {
   );
 }
 
-export interface CreateTaxpayerInput {
+export interface CreateTaxpayerInput extends WorkProfileInput {
   ruc: string;
   businessName: string;
   tradeName?: string;
@@ -61,6 +63,7 @@ export async function createTaxpayer(
           ivaPeriodicity: input.ivaPeriodicity,
           economicActivities: input.economicActivities,
           activityFingerprint,
+          ...normalizeWorkProfile(input),
           createdBy: userId,
         },
       });

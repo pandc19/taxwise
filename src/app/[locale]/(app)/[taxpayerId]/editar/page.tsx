@@ -33,6 +33,10 @@ export default async function EditTaxpayerPage({
                   .length > 0
                   ? (taxpayer.economicActivities as Array<{ code: string; description: string }>)
                   : [{ code: '', description: '' }],
+              workDescription: taxpayer.workDescription ?? '',
+              workSetup: taxpayer.workSetup,
+              typicalExpenses: taxpayer.typicalExpenses,
+              purchaseTreatment: taxpayer.purchaseTreatment,
             }}
           />
         </CardContent>

@@ -24,10 +24,13 @@ opening to real users.
 
 ## To build
 
-- [ ] **Supplier profiles and work profile** (ADR-017, phases 2–3):
-      global `supplier_profiles`, relevance-only AI with remembered answers,
-      the taxpayer's work description/tags/typical expenses, and the
-      credit-vs-expense setting. Waiting on the ADR's open questions.
+- [ ] **Confirm `purchase_treatment`'s default with an accountant**
+      (ADR-017): `CLAIM_CREDIT` follows what the SRI says about exporters,
+      but it is a tax position the user owns.
+- [ ] **Domain tests for the cascade** (`src/domain/iva/classification-cascade.ts`):
+      no runner is configured. A throwaway script checked 19 cases (rule
+      precedence, stale rules, remembered AI answers, mixed-use, thresholds);
+      they should become real tests.
 - [ ] **Batch API for the AI classification pass** (`src/services/ai/`,
       since 2026-10-04; CLAUDE.md's model table calls for it —
       "Batch API para el pase masivo"). `classifyPeriod()` currently

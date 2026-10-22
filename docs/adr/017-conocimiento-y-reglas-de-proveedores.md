@@ -1,8 +1,9 @@
 # ADR-017: Supplier knowledge and rules
 
 ## Status
-Accepted. Phase 1 is implemented (2026-10-22); phases 2 and 3 wait on the
-open questions below.
+Accepted and implemented (2026-10-22). The open questions were settled with
+the defaults recorded below; the first one still needs an accountant's
+confirmation.
 
 ## Date
 2026-10-22
@@ -156,12 +157,12 @@ the AI off, levels 1–3 and 5 still work.
 1. **Opt-in rules** *(done)* — manual = per voucher, explicit "apply to
    supplier", a rule revoked when the user classifies that supplier
    differently, stale rules no longer blocking the AI, the Proveedores
-   screen (change, revoke, reconfirm stale), `ai_enabled` enforced. Rules
-   still store a category here; relevance comes with phase 3. The
-   `mixed_use` flag needs phase 2's supplier profile and is not in this phase.
-2. **Supplier profiles** — `supplier_profiles` and the supplier-only AI call.
-3. **Work profile and relevance** — the taxpayer inputs, `purchase_treatment`,
-   relevance-only AI, remembered answers, deterministic level 3.
+   screen (change, revoke, reconfirm stale), `ai_enabled` enforced. 
+2. **Supplier profiles** *(done)* — `supplier_profiles` and the supplier-only
+   AI call.
+3. **Work profile and relevance** *(done)* — the taxpayer inputs,
+   `purchase_treatment`, relevance-only AI, remembered answers,
+   deterministic level 3; rules now store relevance.
 
 ## Consequences
 
@@ -180,16 +181,23 @@ the AI off, levels 1–3 and 5 still work.
 - `supplier_rules` rows will hold relevance instead of a category (phase 3).
   Existing development data is not migrated; `npm run db:reset` starts clean.
 
-## Open questions
+## Open questions — settled
 
-- **Default `purchase_treatment`.** If the user has not chosen, do `RELATED`
-  purchases default to `CLAIM_CREDIT` (what the law's credit rule says for
-  exporters, per the SRI) or wait for an explicit choice? The tax-position
-  question should be confirmed with an accountant before the default ships.
-- **Is the closed list of supplier `kinds` enough**, or should unknown kinds
-  fall straight to the AI in level 4?
-- **Should `mixed_use` suppliers ever be auto-decided** once the user has
-  classified a few of their vouchers consistently?
+- **Default `purchase_treatment`: `CLAIM_CREDIT`**, always visible and
+  editable on the taxpayer form with a notice that it is the user's own
+  decision to confirm with an accountant. It follows what the SRI says about
+  exporters (credit by Art. 66 LRTI; refund by Art. 72 as a separate path).
+  **This still needs an accountant's confirmation before real use.**
+- **The closed list of supplier `kinds`** lives in
+  `src/domain/iva/supplier-kinds.ts`; `OTHER` is allowed and simply never
+  matches level 3, so it falls to the AI.
+- **A supplier the AI doesn't recognise** (profile confidence below 0.70) is
+  treated like a mixed-use one: no kind match, no relevance call, review. A
+  profile is a fact about the world; judging a buyer from a guess only hides
+  the guess. Profiles use the strong model since they are asked once per RUC.
+- **`mixed_use` suppliers are never auto-decided** (no profile match, no AI);
+  only an explicit user rule decides them. Revisit once there is real data on
+  how often this sends vouchers to review.
 
 ## Alternatives considered
 

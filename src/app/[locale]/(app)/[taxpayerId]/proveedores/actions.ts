@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { withUser } from '@/lib/db';
 import { getCurrentUserId } from '@/lib/session';
-import type { IvaCategory } from '@prisma/client';
+import type { Relevance } from '@prisma/client';
 
 /**
  * The taxpayer's supplier rules (ADR-006, ADR-017): the only place to see,
@@ -27,14 +27,22 @@ export async function getSupplierRules(taxpayerId: string) {
       distinct: ['supplierRuc'],
     });
     const nameByRuc = new Map(names.map((n) => [n.supplierRuc, n.supplierName]));
+    const profiles = await tx.supplierProfile.findMany({
+      where: { supplierRuc: { in: rules.map((r) => r.supplierRuc) } },
+    });
+    const summaryByRuc = new Map(profiles.map((p) => [p.supplierRuc, p.summary]));
     return rules.map((r) => ({
       id: r.id,
       supplierRuc: r.supplierRuc,
       supplierName: nameByRuc.get(r.supplierRuc) ?? r.supplierRuc,
-      ivaCategory: r.ivaCategory,
+      relevance: r.relevance,
       source: r.source,
-      timesApplied: r.timesApplied,
-      stale: r.activityFingerprint !== taxpayer.activityFingerprint,
+      summary: summaryByRuc.get(r.supplierRuc) ?? null,
+      reasoning: r.reasoning,
+      confidence: r.confidence?.toString() ?? null,
+      // Only the user's own rules wait for reconfirmation; a remembered AI
+      // answer that no longer fits is simply asked again.
+      stale: r.source === 'USER' && r.activityFingerprint !== taxpayer.activityFingerprint,
     }));
   });
 }
@@ -51,7 +59,7 @@ export async function revokeSupplierRule(taxpayerId: string, ruleId: string) {
 }
 
 /** Changing a rule also re-issues it under the current activity fingerprint. */
-export async function changeSupplierRule(taxpayerId: string, ruleId: string, category: IvaCategory) {
+export async function changeSupplierRule(taxpayerId: string, ruleId: string, relevance: Relevance) {
   const userId = await getCurrentUserId();
   await withUser(userId, async (tx) => {
     const taxpayer = await tx.taxpayer.findUniqueOrThrow({
@@ -60,7 +68,16 @@ export async function changeSupplierRule(taxpayerId: string, ruleId: string, cat
     });
     await tx.supplierRule.updateMany({
       where: { id: ruleId, taxpayerId, revokedAt: null },
-      data: { ivaCategory: category, activityFingerprint: taxpayer.activityFingerprint, source: 'USER' },
+      data: {
+        relevance,
+        activityFingerprint: taxpayer.activityFingerprint,
+        source: 'USER',
+        profileHash: null,
+        confidence: null,
+        reasoning: null,
+        modelId: null,
+        promptVersion: null,
+      },
     });
   });
   revalidatePath(`/${taxpayerId}/proveedores`);
@@ -75,7 +92,12 @@ export async function reconfirmStaleRules(taxpayerId: string) {
       select: { activityFingerprint: true },
     });
     await tx.supplierRule.updateMany({
-      where: { taxpayerId, revokedAt: null, activityFingerprint: { not: taxpayer.activityFingerprint } },
+      where: {
+        taxpayerId,
+        revokedAt: null,
+        source: 'USER',
+        activityFingerprint: { not: taxpayer.activityFingerprint },
+      },
       data: { activityFingerprint: taxpayer.activityFingerprint },
     });
   });

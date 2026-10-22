@@ -87,21 +87,28 @@ enum TaxpayerAccess {
 // ============================================================================
 
 model Taxpayer {
-  id                  String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  ruc                 String      @unique
-  businessName        String      @map("business_name")
-  tradeName           String?     @map("trade_name")
-  regime              TaxRegime   @default(GENERAL)
-  ivaPeriodicity      Periodicity @default(MONTHLY) @map("iva_periodicity")
-  economicActivities  Json        @default("[]") @map("economic_activities") // [{code, description}]
-  activityFingerprint String      @map("activity_fingerprint")
+  id                  String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  ruc                 String            @unique
+  businessName        String            @map("business_name")
+  tradeName           String?           @map("trade_name")
+  regime              TaxRegime         @default(GENERAL)
+  ivaPeriodicity      Periodicity       @default(MONTHLY) @map("iva_periodicity")
+  economicActivities  Json              @default("[]") @map("economic_activities") // [{code, description}]
+  activityFingerprint String            @map("activity_fingerprint")
+  // What the taxpayer tells us about their work (ADR-017): context for the
+  // AI, never their identity. `purchaseTreatment` is their own choice of what
+  // happens to the IVA of purchases that relate to their work.
+  workDescription     String?           @map("work_description")
+  workSetup           String[]          @default([]) @map("work_setup")
+  typicalExpenses     String[]          @default([]) @map("typical_expenses")
+  purchaseTreatment   PurchaseTreatment @default(CLAIM_CREDIT) @map("purchase_treatment")
   // Who created it -- not in data-model.md, added because Prisma's
   // .create() always does INSERT ... RETURNING, and Postgres filters
   // RETURNING through the SELECT policy: without this, the creator can't
   // see the row they just inserted until the link exists in
   // user_taxpayers (created in the next statement, not the same one).
-  createdBy           String      @map("created_by") @db.Uuid
-  createdAt           DateTime    @default(now()) @map("created_at")
+  createdBy           String            @map("created_by") @db.Uuid
+  createdAt           DateTime          @default(now()) @map("created_at")
 
   creator          User              @relation(fields: [createdBy], references: [id])
   userTaxpayers    UserTaxpayer[]
@@ -114,6 +121,11 @@ model Taxpayer {
 
   @@index([ruc])
   @@map("taxpayers")
+}
+
+enum PurchaseTreatment {
+  CLAIM_CREDIT
+  DEDUCT_AS_EXPENSE
 }
 
 enum TaxRegime {
@@ -319,21 +331,50 @@ enum SalesTreatment {
 
 /// The rule is per taxpayer; revocable, never deleted (ADR-006).
 model SupplierRule {
-  id                  String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  taxpayerId          String      @map("taxpayer_id") @db.Uuid
-  supplierRuc         String      @map("supplier_ruc")
-  activityFingerprint String      @map("activity_fingerprint")
-  ivaCategory         IvaCategory @map("iva_category")
+  id                  String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  taxpayerId          String     @map("taxpayer_id") @db.Uuid
+  supplierRuc         String     @map("supplier_ruc")
+  activityFingerprint String     @map("activity_fingerprint")
+  relevance           Relevance
   source              RuleSource
-  createdBy           String?     @map("created_by") @db.Uuid
-  timesApplied        Int         @default(0) @map("times_applied")
-  revokedAt           DateTime?   @map("revoked_at")
-  appliedAt           DateTime    @default(now()) @map("applied_at")
+  // Only for `source = AI` (remembered answers, ADR-017): valid for the work
+  // profile they were given, and explainable later.
+  profileHash         String?    @map("profile_hash")
+  confidence          Decimal?   @db.Decimal(3, 2)
+  reasoning           String?
+  modelId             String?    @map("model_id")
+  promptVersion       String?    @map("prompt_version")
+  createdBy           String?    @map("created_by") @db.Uuid
+  timesApplied        Int        @default(0) @map("times_applied")
+  revokedAt           DateTime?  @map("revoked_at")
+  appliedAt           DateTime   @default(now()) @map("applied_at")
 
   taxpayer Taxpayer @relation(fields: [taxpayerId], references: [id], onDelete: Cascade)
 
   @@index([taxpayerId])
   @@map("supplier_rules")
+}
+
+enum Relevance {
+  RELATED
+  NOT_RELATED
+}
+
+/// What a supplier is, regardless of who buys from it (ADR-017). Global:
+/// public supplier data only, no taxpayer or user identifiers, no RLS.
+model SupplierProfile {
+  supplierRuc   String   @id @map("supplier_ruc")
+  supplierName  String   @map("supplier_name")
+  kinds         String[]
+  summary       String
+  mixedUse      Boolean  @default(false) @map("mixed_use")
+  confidence    Decimal  @db.Decimal(3, 2)
+  modelId       String   @map("model_id")
+  promptVersion String   @map("prompt_version")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("supplier_profiles")
 }
 
 enum RuleSource {

@@ -85,6 +85,10 @@ Unique `(user_id, taxpayer_id)`.
 | `iva_periodicity` | ENUM | `MONTHLY` \| `SEMIANNUAL` \| `ANNUAL`, default `MONTHLY` — entered by the user, editable |
 | `economic_activities` | JSONB | `[{code, description}]` |
 | `activity_fingerprint` | TEXT | hash of the set of activities |
+| `work_description` | TEXT | nullable, ≤ 280 chars — what the taxpayer does and for whom; sent to the AI ([ADR-017](adr/017-conocimiento-y-reglas-de-proveedores.md)) |
+| `work_setup` | TEXT[] | `REMOTE_HOME_OFFICE` \| `OWN_PREMISES` \| `FIELD_WORK` \| `OWN_EQUIPMENT` |
+| `typical_expenses` | TEXT[] | what they say they buy for work (`INTERNET`, `MOBILE`, `HARDWARE_EQUIPMENT`…) |
+| `purchase_treatment` | ENUM | `CLAIM_CREDIT` \| `DEDUCT_AS_EXPENSE`, default `CLAIM_CREDIT` — the taxpayer's own choice for the IVA of purchases that relate to their work |
 | `created_by` | UUID | FK to `users` — not part of the original design; see note below |
 | `created_at` | TIMESTAMP | |
 
@@ -213,8 +217,11 @@ remains `UNCLASSIFIED`.
 
 ### `supplier_rules`
 
-The rule is per taxpayer, revocable, never deleted
-([ADR-006](adr/006-reglas-por-proveedor-y-actividad-economica.md)). **Under RLS.**
+A decision about a supplier for one taxpayer, revocable, never deleted
+([ADR-006](adr/006-reglas-por-proveedor-y-actividad-economica.md),
+[ADR-017](adr/017-conocimiento-y-reglas-de-proveedores.md)). It stores
+**relevance**, not a category: the category is derived from the taxpayer's
+`purchase_treatment`. **Under RLS.**
 
 | Column | Type | Notes |
 |---|---|---|
@@ -222,12 +229,30 @@ The rule is per taxpayer, revocable, never deleted
 | `taxpayer_id` | UUID | FK |
 | `supplier_ruc` | TEXT | |
 | `activity_fingerprint` | TEXT | context under which it was decided |
-| `iva_category` | ENUM | `CREDIT` \| `COST_EXPENSE` \| `NON_DEDUCTIBLE` |
-| `source` | ENUM | `USER` \| `CATALOG` \| `AI` |
+| `relevance` | ENUM | `RELATED` \| `NOT_RELATED` — whether purchases from this supplier relate to the taxpayer's work |
+| `source` | ENUM | `USER` (the user's explicit choice) \| `CATALOG` \| `AI` (a remembered answer) |
+| `profile_hash` | TEXT | only `AI`: hash of the work profile the answer was given for |
+| `confidence`, `reasoning`, `model_id`, `prompt_version` | | only `AI`: what the model said and which model/prompt said it |
 | `created_by` | UUID | nullable if created by the engine |
 | `times_applied` | INT | default 0 |
 | `revoked_at` | TIMESTAMP | nullable |
 | `applied_at` | TIMESTAMP | |
+
+### `supplier_profiles`
+
+What a supplier is, whoever buys from it ([ADR-017](adr/017-conocimiento-y-reglas-de-proveedores.md)).
+Public supplier data only; no taxpayer or user identifiers. **No RLS.**
+
+| Column | Type | Notes |
+|---|---|---|
+| `supplier_ruc` | TEXT | PK |
+| `supplier_name` | TEXT | |
+| `kinds` | TEXT[] | from the closed list in `src/domain/iva/supplier-kinds.ts` |
+| `summary` | TEXT | what it usually sells |
+| `mixed_use` | BOOLEAN | sold to businesses and households alike: its vouchers are never decided automatically |
+| `confidence` | DECIMAL(3,2) | |
+| `model_id`, `prompt_version` | TEXT | |
+| `created_at`, `updated_at` | TIMESTAMP | |
 
 ### `shared_supplier_catalog`
 
@@ -337,7 +362,7 @@ implemented.
 
 **No RLS** (they hold no taxpayer data): `users`, `plans`,
 `tax_rates`,
-`shared_supplier_catalog`, `ai_usage`.
+`supplier_profiles`, `shared_supplier_catalog`, `ai_usage`.
 
 Every table with RLS has both `ENABLE ROW LEVEL SECURITY` and
 `FORCE ROW LEVEL SECURITY` — the app connects as the same role (`taxap`)

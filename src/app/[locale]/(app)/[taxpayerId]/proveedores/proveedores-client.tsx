@@ -15,15 +15,17 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { changeSupplierRule, reconfirmStaleRules, revokeSupplierRule } from './actions';
-import type { IvaCategory, RuleSource } from '@prisma/client';
+import type { Relevance, RuleSource } from '@prisma/client';
 
 interface RuleRow {
   id: string;
   supplierRuc: string;
   supplierName: string;
-  ivaCategory: IvaCategory;
+  relevance: Relevance;
   source: RuleSource;
-  timesApplied: number;
+  summary: string | null;
+  reasoning: string | null;
+  confidence: string | null;
   stale: boolean;
 }
 
@@ -73,27 +75,38 @@ export function ProveedoresClient({ taxpayerId, rules }: { taxpayerId: string; r
           <TableBody>
             {rules.map((r) => (
               <TableRow key={r.id}>
-                <TableCell>{r.supplierName}</TableCell>
+                <TableCell>
+                  <div>{r.supplierName}</div>
+                  {r.summary && <div className="text-xs text-muted-foreground">{r.summary}</div>}
+                </TableCell>
                 <TableCell>{r.supplierRuc}</TableCell>
                 <TableCell>
                   <Select
-                    value={r.ivaCategory}
+                    value={r.relevance}
                     disabled={isPending}
                     onValueChange={(v) =>
-                      startTransition(() => changeSupplierRule(taxpayerId, r.id, v as IvaCategory))
+                      startTransition(() => changeSupplierRule(taxpayerId, r.id, v as Relevance))
                     }
                   >
-                    <SelectTrigger className="w-44">
+                    <SelectTrigger className="w-56">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="CREDIT">{conc('withCredit')}</SelectItem>
-                      <SelectItem value="COST_EXPENSE">{conc('costOrExpense')}</SelectItem>
-                      <SelectItem value="NON_DEDUCTIBLE">{conc('nonDeductible')}</SelectItem>
+                      <SelectItem value="RELATED">{t('related')}</SelectItem>
+                      <SelectItem value="NOT_RELATED">{t('notRelated')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>
                 <TableCell>
+                  <Badge
+                    variant="outline"
+                    className="mr-1"
+                    title={r.source === 'AI' ? (r.reasoning ?? t('sourceAiHint')) : t('sourceUserHint')}
+                  >
+                    {r.source === 'AI'
+                      ? `${t('sourceAi')}${r.confidence ? ` ${Math.round(parseFloat(r.confidence) * 100)}%` : ''}`
+                      : t('sourceUser')}
+                  </Badge>
                   {r.stale ? (
                     <Badge variant="outline" title={t('staleTitle')}>
                       {t('stale')}
