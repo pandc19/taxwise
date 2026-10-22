@@ -13,8 +13,8 @@ export default async function SuppliersPage({
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      <h2 className="mb-2 text-xl font-semibold">{t('title')}</h2>
-      <p className="mb-6 text-sm text-muted-foreground">{t('intro')}</p>
+      <h2 className="mb-2 text-3xl font-semibold">{t('title')}</h2>
+      <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t('intro')}</p>
       <SuppliersClient taxpayerId={taxpayerId} rules={rules} />
     </div>
   );

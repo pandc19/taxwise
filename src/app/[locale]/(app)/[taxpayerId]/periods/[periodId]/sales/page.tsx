@@ -13,7 +13,7 @@ export default async function SalesPage({
 
   return (
     <div>
-      <h2 className="mb-6 text-xl font-semibold">{t('title')}</h2>
+      <h2 className="mb-6 text-2xl font-semibold">{t('title')}</h2>
 
       <SalesTable
         sales={sales.map((s) => ({

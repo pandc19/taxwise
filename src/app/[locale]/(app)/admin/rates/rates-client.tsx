@@ -207,6 +207,7 @@ export function RatesClient({ initialRates }: { initialRates: RateRow[] }) {
       {rates.length === 0 ? (
         <p className="text-muted-foreground">{t('tasasEmpty')}</p>
       ) : (
+        <div className="overflow-hidden rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -254,6 +255,7 @@ export function RatesClient({ initialRates }: { initialRates: RateRow[] }) {
             ))}
           </TableBody>
         </Table>
+        </div>
       )}
     </div>
   );

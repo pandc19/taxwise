@@ -61,7 +61,7 @@ export function SuppliersClient({ taxpayerId, rules }: { taxpayerId: string; rul
         </Alert>
       )}
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -76,10 +76,10 @@ export function SuppliersClient({ taxpayerId, rules }: { taxpayerId: string; rul
             {rules.map((r) => (
               <TableRow key={r.id}>
                 <TableCell>
-                  <div>{r.supplierName}</div>
+                  <div className="font-medium">{r.supplierName}</div>
                   {r.summary && <div className="text-xs text-muted-foreground">{r.summary}</div>}
                 </TableCell>
-                <TableCell>{r.supplierRuc}</TableCell>
+                <TableCell className="tabular-nums text-muted-foreground">{r.supplierRuc}</TableCell>
                 <TableCell>
                   <Select
                     value={r.relevance}

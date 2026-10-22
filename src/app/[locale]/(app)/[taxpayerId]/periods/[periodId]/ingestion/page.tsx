@@ -30,20 +30,18 @@ export default async function IngestionPage({
 
   return (
     <div>
-      <h2 className="mb-6 text-xl font-semibold">{t('title')}</h2>
+      <h2 className="mb-6 text-2xl font-semibold">{t('title')}</h2>
 
       <IngestionClient />
 
       {received.length + issued.length > 0 && (
-        <Alert className="mb-6 border-green-600">
-          <CheckCircle2 className="size-4 text-green-600" />
+        <Alert className="mb-6 border-l-4 border-l-primary">
+          <CheckCircle2 className="size-4 text-primary" />
           <AlertDescription className="flex items-center justify-between">
             <span>{t('readyMessage', { count: received.length + issued.length })}</span>
-            <Link
-              href={`/${taxpayerId}/periods/${periodId}/sales`}
-            >
-              <Button variant="link">{t('continueToVentas')}</Button>
-            </Link>
+            <Button asChild size="sm">
+              <Link href={`/${taxpayerId}/periods/${periodId}/sales`}>{t('continueToVentas')}</Link>
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -126,9 +124,9 @@ export default async function IngestionPage({
                           <div className="text-xs text-muted-foreground">{i.supplierRuc}</div>
                         </TableCell>
                         <TableCell>{i.series}</TableCell>
-                        <TableCell className="text-right">{i.subtotal.toString()}</TableCell>
-                        <TableCell className="text-right">{i.vatAmount.toString()}</TableCell>
-                        <TableCell className="text-right">{i.total.toString()}</TableCell>
+                        <TableCell className="amount">{i.subtotal.toString()}</TableCell>
+                        <TableCell className="amount">{i.vatAmount.toString()}</TableCell>
+                        <TableCell className="amount">{i.total.toString()}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -159,9 +157,9 @@ export default async function IngestionPage({
                       <TableRow key={i.id}>
                         <TableCell>{fmtDate(i.issueDate)}</TableCell>
                         <TableCell>{i.series}</TableCell>
-                        <TableCell className="text-right">{i.subtotal.toString()}</TableCell>
-                        <TableCell className="text-right">{i.vatAmount.toString()}</TableCell>
-                        <TableCell className="text-right">{i.total.toString()}</TableCell>
+                        <TableCell className="amount">{i.subtotal.toString()}</TableCell>
+                        <TableCell className="amount">{i.vatAmount.toString()}</TableCell>
+                        <TableCell className="amount">{i.total.toString()}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

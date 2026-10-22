@@ -244,7 +244,7 @@ export function TaxpayerForm({
         </Button>
       </div>
 
-      <fieldset className="space-y-4 rounded-md border p-4">
+      <fieldset className="space-y-4 rounded-lg border bg-card p-5">
         <legend className="px-1 text-sm font-medium">{t('workHeading')}</legend>
         <p className="text-sm text-muted-foreground">{t('workIntro')}</p>
 

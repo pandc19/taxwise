@@ -62,6 +62,7 @@ export function IngestionClient() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
+            className="h-auto border-dashed border-foreground/30 bg-transparent py-6 file:mr-4 file:h-8 file:rounded-md file:bg-secondary file:px-3 file:py-1.5"
             key={inputKey}
             type="file"
             accept=".txt"
@@ -95,21 +96,21 @@ export function IngestionClient() {
                 {t('fileType')}: {result.fileType}
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-4 gap-4 text-center">
+            <CardContent className="grid grid-cols-2 gap-4 text-center sm:grid-cols-4 [&>div]:tabular-nums">
               <div>
-                <div className="text-2xl font-bold">{result.totalRows}</div>
+                <div className="text-3xl font-semibold">{result.totalRows}</div>
                 <div className="text-sm text-muted-foreground">{t('totalRows')}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-green-600">{result.validCount}</div>
+                <div className="text-3xl font-semibold text-primary">{result.validCount}</div>
                 <div className="text-sm text-muted-foreground">{t('valid')}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-muted-foreground">{result.duplicateCount}</div>
+                <div className="text-3xl font-semibold text-muted-foreground">{result.duplicateCount}</div>
                 <div className="text-sm text-muted-foreground">{t('alreadyLoaded')}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-destructive">{result.errorCount}</div>
+                <div className="text-3xl font-semibold text-destructive">{result.errorCount}</div>
                 <div className="text-sm text-muted-foreground">{t('errors')}</div>
               </div>
             </CardContent>

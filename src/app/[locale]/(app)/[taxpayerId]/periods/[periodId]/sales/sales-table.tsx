@@ -90,21 +90,30 @@ export function SalesTable({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          {t('taxedSales')}: <strong>{taxed.length}</strong> · {t('assignedAutomatically')}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
+        <div className="bg-card px-5 py-4">
+          <div className="text-3xl font-semibold tabular-nums">{taxed.length}</div>
+          <div className="mt-1 text-sm text-muted-foreground">
+            {t('taxedSales')} · {t('assignedAutomatically')}
+          </div>
         </div>
-        <div>
-          {t('zeroRatedSales')}: <strong>{zeroRate.length}</strong>
-          {unmarked.length > 0 && (
-            <span className="text-destructive"> · {t('missingCount', { count: unmarked.length })}</span>
-          )}
+        <div className="bg-card px-5 py-4">
+          <div className="text-3xl font-semibold tabular-nums">{zeroRate.length}</div>
+          <div className="mt-1 text-sm text-muted-foreground">
+            {t('zeroRatedSales')}
+            {unmarked.length > 0 && (
+              <span className="font-medium text-destructive">
+                {' '}
+                · {t('missingCount', { count: unmarked.length })}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {zeroRate.length > 0 && (
-        <div className="rounded-md border">
-          <div className="flex items-center gap-3 border-b p-3">
+        <div className="overflow-hidden rounded-lg border bg-card">
+          <div className="flex flex-wrap items-center gap-3 border-b bg-secondary/60 px-4 py-3">
             <Checkbox
               checked={selected.size === zeroRate.length && zeroRate.length > 0}
               onCheckedChange={(checked) =>
@@ -136,7 +145,7 @@ export function SalesTable({
                 <TableHead className="w-10" />
                 <TableHead>{t('series')}</TableHead>
                 <TableHead>{t('date')}</TableHead>
-                <TableHead>{t('total')}</TableHead>
+                <TableHead className="text-right">{t('total')}</TableHead>
                 <TableHead>{t('destination')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -153,7 +162,7 @@ export function SalesTable({
                   <TableCell>
                     {new Date(sale.issueDate).toLocaleDateString('es-EC', { timeZone: 'UTC' })}
                   </TableCell>
-                  <TableCell>{sale.total}</TableCell>
+                  <TableCell className="amount">{sale.total}</TableCell>
                   <TableCell>
                     <Select
                       value={sale.salesTreatment === 'UNCLASSIFIED' ? '' : sale.salesTreatment}
@@ -188,9 +197,9 @@ export function SalesTable({
         </Alert>
       )}
 
-      <Link href={`/${taxpayerId}/periods/${periodId}/reconciliation`}>
-        <Button variant="link">{t('continueToConciliation')}</Button>
-      </Link>
+      <Button asChild>
+        <Link href={`/${taxpayerId}/periods/${periodId}/reconciliation`}>{t('continueToConciliation')}</Link>
+      </Button>
     </div>
   );
 }

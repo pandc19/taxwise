@@ -14,9 +14,9 @@ export function AdminNav({ items }: { items: { href: string; label: string }[] }
           href={item.href}
           aria-current={pathname.startsWith(item.href) ? 'page' : undefined}
           className={cn(
-            '-mb-px border-b-2 px-1 py-2',
+            '-mb-px border-b-2 px-1 py-2.5',
             pathname.startsWith(item.href)
-              ? 'border-primary font-medium text-foreground'
+              ? 'border-primary font-semibold text-foreground'
               : 'border-transparent text-muted-foreground hover:text-foreground'
           )}
         >

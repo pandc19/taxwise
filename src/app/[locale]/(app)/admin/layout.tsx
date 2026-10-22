@@ -13,9 +13,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const t = await getTranslations('Admin');
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold">{t('title')}</h1>
-      <Alert className="mb-6">
+    <div className="mx-auto max-w-4xl px-6 py-10">
+      <h1 className="mb-4 text-3xl font-semibold">{t('title')}</h1>
+      <Alert className="mb-6 border-l-4 border-l-signal">
         <AlertDescription>{t('disclaimer')}</AlertDescription>
       </Alert>
 

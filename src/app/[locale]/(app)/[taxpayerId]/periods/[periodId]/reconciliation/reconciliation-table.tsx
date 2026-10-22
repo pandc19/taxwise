@@ -182,8 +182,8 @@ export function ReconciliationTable({
       )}
 
       {unclassified.length > 0 && (
-        <Alert className="border-primary">
-          <Sparkles className="size-4 text-primary" />
+        <Alert className="border-l-4 border-l-signal">
+          <Sparkles className="size-4" />
           <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
             <span>{t('unclassifiedHint', { count: unclassified.length })}</span>
             <Button onClick={runCascade} disabled={isPending}>
@@ -202,26 +202,42 @@ export function ReconciliationTable({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant={tab === 'UNCLASSIFIED' ? 'default' : 'outline'} size="sm" title={t('tabUnclassifiedHint')} onClick={() => setTab('UNCLASSIFIED')}>
-          {t('tabUnclassified')} ({unclassified.length})
-        </Button>
-        <Button variant={tab === 'CREDIT' ? 'default' : 'outline'} size="sm" title={t('tabWithCreditHint')} onClick={() => setTab('CREDIT')}>
-          {t('tabWithCredit')} ({withCredit.length})
-        </Button>
-        <Button variant={tab === 'COST_EXPENSE' ? 'default' : 'outline'} size="sm" title={t('tabCostExpenseHint')} onClick={() => setTab('COST_EXPENSE')}>
-          {t('tabCostExpense')} ({costExpense.length})
-        </Button>
-        <Button variant={tab === 'NON_DEDUCTIBLE' ? 'default' : 'outline'} size="sm" title={t('tabNonDeductibleHint')} onClick={() => setTab('NON_DEDUCTIBLE')}>
-          {t('tabNonDeductible')} ({nonDeductible.length})
-        </Button>
-        <Button variant={tab === 'PENDING' ? 'default' : 'outline'} size="sm" title={t('tabPendingHint')} onClick={() => setTab('PENDING')}>
-          {t('tabPending')} ({pending.length})
-          {pending.length > 0 && <Badge variant="destructive" className="ml-1">•</Badge>}
-        </Button>
-        <Button variant={tab === 'NO_VAT' ? 'default' : 'outline'} size="sm" title={t('noVatInfo')} onClick={() => setTab('NO_VAT')}>
-          {t('tabNoVat')} ({noVat.length})
-        </Button>
+      <div role="tablist" className="-mb-2 flex gap-5 overflow-x-auto border-b">
+        {(
+          [
+            ['UNCLASSIFIED', t('tabUnclassified'), unclassified.length, t('tabUnclassifiedHint')],
+            ['CREDIT', t('tabWithCredit'), withCredit.length, t('tabWithCreditHint')],
+            ['COST_EXPENSE', t('tabCostExpense'), costExpense.length, t('tabCostExpenseHint')],
+            ['NON_DEDUCTIBLE', t('tabNonDeductible'), nonDeductible.length, t('tabNonDeductibleHint')],
+            ['PENDING', t('tabPending'), pending.length, t('tabPendingHint')],
+            ['NO_VAT', t('tabNoVat'), noVat.length, t('noVatInfo')],
+          ] as const
+        ).map(([key, label, count, hint]) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={tab === key}
+            title={hint}
+            onClick={() => setTab(key)}
+            className={`-mb-px flex items-center gap-1.5 whitespace-nowrap border-b-2 py-2.5 text-sm transition-colors ${
+              tab === key
+                ? 'border-primary font-semibold text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {label}
+            <span
+              className={`rounded-sm px-1.5 text-xs tabular-nums ${
+                key === 'PENDING' && count > 0
+                  ? 'bg-signal text-signal-foreground'
+                  : 'bg-secondary text-secondary-foreground'
+              }`}
+            >
+              {count}
+            </span>
+          </button>
+        ))}
       </div>
 
       {tab !== 'NO_VAT' && (
@@ -232,9 +248,9 @@ export function ReconciliationTable({
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">{t('noVatInfo')}</p>
           {noVat.length === 0 ? (
-            <p className="text-muted-foreground">{t('emptyState')}</p>
+            <p className="py-6 text-center text-muted-foreground">{t('emptyState')}</p>
           ) : (
-            <div className="rounded-md border">
+            <div className="overflow-hidden rounded-lg border bg-card">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -251,10 +267,10 @@ export function ReconciliationTable({
                       <TableCell>
                         {new Date(p.issueDate).toLocaleDateString('es-EC', { timeZone: 'UTC' })}
                       </TableCell>
-                      <TableCell>{p.supplierName}</TableCell>
-                      <TableCell>{p.supplierRuc}</TableCell>
+                      <TableCell className="max-w-64 truncate font-medium">{p.supplierName}</TableCell>
+                      <TableCell className="tabular-nums text-muted-foreground">{p.supplierRuc}</TableCell>
                       <TableCell>{p.series}</TableCell>
-                      <TableCell className="text-right">{p.total}</TableCell>
+                      <TableCell className="amount">{p.total}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -274,14 +290,14 @@ export function ReconciliationTable({
       )}
 
       {visible.length === 0 ? (
-        <p className="text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-foreground/25 py-10 text-center text-muted-foreground">
           {tab === 'UNCLASSIFIED' && purchases.length > 0 && pending.length + withCredit.length + costExpense.length + nonDeductible.length === 0
             ? t('nothingClassifiedYet')
             : t('emptyState')}
         </p>
       ) : (
-        <div className="rounded-md border">
-          <div className="flex flex-wrap items-center gap-3 border-b p-3">
+        <div className="overflow-hidden rounded-lg border bg-card">
+          <div className="flex flex-wrap items-center gap-3 border-b bg-secondary/60 px-4 py-3">
             <Checkbox
               checked={selected.size === visible.length && visible.length > 0}
               onCheckedChange={(checked) =>
@@ -327,7 +343,7 @@ export function ReconciliationTable({
                 <TableHead className="w-10" />
                 <TableHead>{t('supplier')}</TableHead>
                 <TableHead>{t('ruc')}</TableHead>
-                <TableHead>{t('total')}</TableHead>
+                <TableHead className="text-right">{t('total')}</TableHead>
                 <TableHead>{t('classification')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -337,9 +353,9 @@ export function ReconciliationTable({
                   <TableCell>
                     <Checkbox checked={selected.has(p.id)} onCheckedChange={() => toggle(p.id)} />
                   </TableCell>
-                  <TableCell>{p.supplierName}</TableCell>
-                  <TableCell>{p.supplierRuc}</TableCell>
-                  <TableCell>{p.total}</TableCell>
+                  <TableCell className="max-w-64 truncate font-medium">{p.supplierName}</TableCell>
+                  <TableCell className="tabular-nums text-muted-foreground">{p.supplierRuc}</TableCell>
+                  <TableCell className="amount">{p.total}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     <Badge variant={p.ivaCategory === 'UNCLASSIFIED' ? 'outline' : 'default'}>
                       {p.ivaCategory === 'CREDIT'
@@ -383,9 +399,9 @@ export function ReconciliationTable({
         </>
       )}
 
-      <Link href={`/${taxpayerId}/periods/${periodId}/pre-filing`}>
-        <Button variant="link">{t('continueToPreDeclaration')}</Button>
-      </Link>
+      <Button asChild>
+        <Link href={`/${taxpayerId}/periods/${periodId}/pre-filing`}>{t('continueToPreDeclaration')}</Link>
+      </Button>
 
       <Dialog open={detail !== null} onOpenChange={(open) => !open && setDetail(null)}>
         <DialogContent>
@@ -399,7 +415,7 @@ export function ReconciliationTable({
               </p>
               {detail.supplierProfile && (
                 <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase text-muted-foreground">{t('supplierProfileHeading')}</p>
+                  <p className="text-sm font-semibold">{t('supplierProfileHeading')}</p>
                   <p>{detail.supplierProfile.summary}</p>
                   {detail.supplierProfile.unknown ? (
                     <p className="text-muted-foreground">{t('unknownSupplierNotice')}</p>
@@ -412,7 +428,7 @@ export function ReconciliationTable({
               )}
               {detail.aiNote ? (
                 <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase text-muted-foreground">{t('relevanceHeading')}</p>
+                  <p className="text-sm font-semibold">{t('relevanceHeading')}</p>
                   <p className="text-muted-foreground">
                     {t('aiConfidence')}: {Math.round(parseFloat(detail.aiNote.confidence) * 100)}% ·{' '}
                     {detail.aiNote.modelId}
