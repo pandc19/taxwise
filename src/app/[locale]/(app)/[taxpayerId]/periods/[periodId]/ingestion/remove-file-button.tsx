@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Trash2 } from 'lucide-react';
+import { useConfirm } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { removeSourceFile } from './actions';
 
@@ -19,11 +20,12 @@ export function RemoveFileButton({
 }) {
   const t = useTranslations('Ingesta');
   const common = useTranslations('Common');
+  const { confirm, dialog } = useConfirm();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function handleClick() {
-    if (!window.confirm(t('removeConfirm', { count: importedCount }))) return;
+  async function handleClick() {
+    if (!(await confirm({ message: t('removeConfirm', { count: importedCount }), confirmLabel: common('delete'), destructive: true }))) return;
     setError(null);
     startTransition(async () => {
       const result = await removeSourceFile(sourceFileId, taxpayerId, periodId);
@@ -35,6 +37,7 @@ export function RemoveFileButton({
 
   return (
     <div className="flex items-center justify-end gap-2">
+      {dialog}
       {error && <span className="text-xs text-destructive">{error}</span>}
       <Button
         variant="ghost"

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { formatMoney } from '@/lib/format-money';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -162,7 +163,7 @@ export function SalesTable({
                   <TableCell>
                     {new Date(sale.issueDate).toLocaleDateString('es-EC', { timeZone: 'UTC' })}
                   </TableCell>
-                  <TableCell className="amount">{sale.total}</TableCell>
+                  <TableCell className="amount">{formatMoney(sale.total)}</TableCell>
                   <TableCell>
                     <Select
                       value={sale.salesTreatment === 'UNCLASSIFIED' ? '' : sale.salesTreatment}

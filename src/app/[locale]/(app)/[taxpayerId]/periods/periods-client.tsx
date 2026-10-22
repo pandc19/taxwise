@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { useConfirm } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,7 @@ export function PeriodsClient({
 }) {
   const t = useTranslations('Periods');
   const common = useTranslations('Common');
+  const { confirm, dialog } = useConfirm();
 
   const [periods, setPeriods] = useState(initialPeriods);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -90,7 +92,7 @@ export function PeriodsClient({
   }
 
   async function handleDelete(periodId: string) {
-    if (!window.confirm(t('deleteConfirm'))) return;
+    if (!(await confirm({ message: t('deleteConfirm'), confirmLabel: common('delete'), destructive: true }))) return;
 
     const result = await deletePeriod(taxpayerId, periodId);
     if (!result.success) {
@@ -103,6 +105,7 @@ export function PeriodsClient({
 
   return (
     <div>
+      {dialog}
       <div className="mb-6 flex items-end justify-between gap-4">
         <h1 className="text-3xl font-semibold">{t('title')}</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

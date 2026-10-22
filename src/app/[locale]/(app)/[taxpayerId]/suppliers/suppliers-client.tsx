@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Trash2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { useConfirm } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -32,11 +33,12 @@ interface RuleRow {
 export function SuppliersClient({ taxpayerId, rules }: { taxpayerId: string; rules: RuleRow[] }) {
   const t = useTranslations('Proveedores');
   const conc = useTranslations('Conciliacion');
+  const { confirm, dialog } = useConfirm();
   const [isPending, startTransition] = useTransition();
   const staleCount = rules.filter((r) => r.stale).length;
 
-  function revoke(id: string) {
-    if (!window.confirm(t('revokeConfirm'))) return;
+  async function revoke(id: string) {
+    if (!(await confirm({ message: t('revokeConfirm'), confirmLabel: t('revoke'), destructive: true }))) return;
     startTransition(() => revokeSupplierRule(taxpayerId, id));
   }
 
@@ -46,6 +48,7 @@ export function SuppliersClient({ taxpayerId, rules }: { taxpayerId: string; rul
 
   return (
     <div className="space-y-4">
+      {dialog}
       {staleCount > 0 && (
         <Alert className="border-primary">
           <AlertDescription className="flex flex-wrap items-center justify-between gap-3">

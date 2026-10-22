@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useConfirm } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,6 +37,7 @@ interface RateRow {
 export function RatesClient({ initialRates }: { initialRates: RateRow[] }) {
   const t = useTranslations('Admin');
   const common = useTranslations('Common');
+  const { confirm, dialog } = useConfirm();
 
   const [rates, setRates] = useState(initialRates);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -127,7 +129,7 @@ export function RatesClient({ initialRates }: { initialRates: RateRow[] }) {
   }
 
   async function handleDelete(r: RateRow) {
-    if (!window.confirm(t('deleteRateConfirm'))) return;
+    if (!(await confirm({ message: t('deleteRateConfirm'), confirmLabel: common('delete'), destructive: true }))) return;
     setListError(null);
     const result = await deleteTaxRate(r.tax as 'IVA', r.validFrom);
     if (!result.success) {
@@ -139,6 +141,7 @@ export function RatesClient({ initialRates }: { initialRates: RateRow[] }) {
 
   return (
     <div>
+      {dialog}
       {listError && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{listError}</AlertDescription>

@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatMoney } from '@/lib/format-money';
 import { getPeriodIngestion } from './actions';
 import { IngestionClient } from './ingestion-client';
 import { RemoveFileButton } from './remove-file-button';
@@ -124,9 +125,9 @@ export default async function IngestionPage({
                           <div className="text-xs text-muted-foreground">{i.supplierRuc}</div>
                         </TableCell>
                         <TableCell>{i.series}</TableCell>
-                        <TableCell className="amount">{i.subtotal.toString()}</TableCell>
-                        <TableCell className="amount">{i.vatAmount.toString()}</TableCell>
-                        <TableCell className="amount">{i.total.toString()}</TableCell>
+                        <TableCell className="amount">{formatMoney(i.subtotal.toString())}</TableCell>
+                        <TableCell className="amount">{formatMoney(i.vatAmount.toString())}</TableCell>
+                        <TableCell className="amount">{formatMoney(i.total.toString())}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -157,9 +158,9 @@ export default async function IngestionPage({
                       <TableRow key={i.id}>
                         <TableCell>{fmtDate(i.issueDate)}</TableCell>
                         <TableCell>{i.series}</TableCell>
-                        <TableCell className="amount">{i.subtotal.toString()}</TableCell>
-                        <TableCell className="amount">{i.vatAmount.toString()}</TableCell>
-                        <TableCell className="amount">{i.total.toString()}</TableCell>
+                        <TableCell className="amount">{formatMoney(i.subtotal.toString())}</TableCell>
+                        <TableCell className="amount">{formatMoney(i.vatAmount.toString())}</TableCell>
+                        <TableCell className="amount">{formatMoney(i.total.toString())}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

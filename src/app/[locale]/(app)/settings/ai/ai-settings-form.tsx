@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useConfirm } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +22,7 @@ interface Saved {
 
 export function AiSettingsForm({ saved }: { saved: Saved | null }) {
   const t = useTranslations('Settings');
+  const { confirm, dialog } = useConfirm();
   const [provider, setProvider] = useState<ProviderName>(saved?.provider ?? 'claude');
   const [key, setKey] = useState('');
   const [workspaceId, setWorkspaceId] = useState(saved?.workspaceId ?? '');
@@ -48,8 +50,8 @@ export function AiSettingsForm({ saved }: { saved: Saved | null }) {
     });
   }
 
-  function remove() {
-    if (!window.confirm(t('removeConfirm'))) return;
+  async function remove() {
+    if (!(await confirm({ message: t('removeConfirm'), confirmLabel: t('removeKey'), destructive: true }))) return;
     startTransition(async () => {
       await removeAiSettings();
       setKey('');
@@ -62,6 +64,7 @@ export function AiSettingsForm({ saved }: { saved: Saved | null }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      {dialog}
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{t(`errors.${error}`)}</AlertDescription>

@@ -5,12 +5,15 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { formatMoney } from '@/lib/format-money';
 import { computePeriodResults, lockPeriod, reopenPeriod } from './actions';
 
 interface ResultRow {
   key: string;
   value: string;
 }
+
+const fmt = (v?: string) => (v === undefined ? v : formatMoney(v));
 
 // One ledger line: label, dotted leader, right-aligned amount. The
 // closing figure of a section gets the accountant's double rule.
@@ -113,19 +116,19 @@ export function PreFilingClient({
 
       <Section title={t('salesHeading')}>
         {salesKeys.map((key) => (
-          <Line key={key} label={t(`results.${key}`)} value={byKey.get(key)} />
+          <Line key={key} label={t(`results.${key}`)} value={key === 'PROPORTIONALITY_FACTOR' ? byKey.get(key) : fmt(byKey.get(key))} />
         ))}
       </Section>
 
       <Section title={t('purchasesHeading')}>
         {purchaseKeys.map((key) => (
-          <Line key={key} label={t(`results.${key}`)} value={byKey.get(key)} />
+          <Line key={key} label={t(`results.${key}`)} value={key === 'PROPORTIONALITY_FACTOR' ? byKey.get(key) : fmt(byKey.get(key))} />
         ))}
       </Section>
 
       <Section title={t('factorHeading')}>
         {byKey.has('PROPORTIONALITY_FACTOR') ? (
-          factorKeys.map((key) => <Line key={key} label={t(`results.${key}`)} value={byKey.get(key)} closing={key === 'CREDIT_APPLICABLE'} />)
+          factorKeys.map((key) => <Line key={key} label={t(`results.${key}`)} value={key === 'PROPORTIONALITY_FACTOR' ? byKey.get(key) : fmt(byKey.get(key))} closing={key === 'CREDIT_APPLICABLE'} />)
         ) : (
           <p className="py-2 text-sm font-medium text-destructive">{t('factorBlocked')}</p>
         )}

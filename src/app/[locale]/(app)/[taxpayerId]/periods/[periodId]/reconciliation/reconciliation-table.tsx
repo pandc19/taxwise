@@ -3,6 +3,8 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { useConfirm } from '@/components/confirm-dialog';
+import { formatMoney } from '@/lib/format-money';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +80,7 @@ export function ReconciliationTable({
 }) {
   const t = useTranslations('Conciliacion');
   const common = useTranslations('Common');
+  const { confirm, dialog } = useConfirm();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState('');
   const [applyToSupplier, setApplyToSupplier] = useState(false);
@@ -150,8 +153,8 @@ export function ReconciliationTable({
     setSelected(new Set());
   }
 
-  function reclassifyAll() {
-    if (!window.confirm(t('reclassifyAllConfirm'))) return;
+  async function reclassifyAll() {
+    if (!(await confirm({ message: t('reclassifyAllConfirm'), confirmLabel: t('reclassifyAll') }))) return;
     run({ reclassify: true });
   }
 
@@ -202,7 +205,7 @@ export function ReconciliationTable({
         </div>
       )}
 
-      <div role="tablist" className="-mb-2 flex gap-5 overflow-x-auto border-b">
+      <div role="tablist" className="flex flex-wrap gap-2">
         {(
           [
             ['UNCLASSIFIED', t('tabUnclassified'), unclassified.length, t('tabUnclassifiedHint')],
@@ -220,10 +223,10 @@ export function ReconciliationTable({
             aria-selected={tab === key}
             title={hint}
             onClick={() => setTab(key)}
-            className={`-mb-px flex items-center gap-1.5 whitespace-nowrap border-b-2 py-2.5 text-sm transition-colors ${
+            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
               tab === key
-                ? 'border-primary font-semibold text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'border-primary bg-primary font-medium text-primary-foreground'
+                : 'bg-card text-foreground/80 hover:bg-accent hover:text-foreground'
             }`}
           >
             {label}
@@ -231,7 +234,9 @@ export function ReconciliationTable({
               className={`rounded-sm px-1.5 text-xs tabular-nums ${
                 key === 'PENDING' && count > 0
                   ? 'bg-signal text-signal-foreground'
-                  : 'bg-secondary text-secondary-foreground'
+                  : tab === key
+                    ? 'bg-white/20 text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground'
               }`}
             >
               {count}
@@ -270,7 +275,7 @@ export function ReconciliationTable({
                       <TableCell className="max-w-64 truncate font-medium">{p.supplierName}</TableCell>
                       <TableCell className="tabular-nums text-muted-foreground">{p.supplierRuc}</TableCell>
                       <TableCell>{p.series}</TableCell>
-                      <TableCell className="amount">{p.total}</TableCell>
+                      <TableCell className="amount">{formatMoney(p.total)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -355,7 +360,7 @@ export function ReconciliationTable({
                   </TableCell>
                   <TableCell className="max-w-64 truncate font-medium">{p.supplierName}</TableCell>
                   <TableCell className="tabular-nums text-muted-foreground">{p.supplierRuc}</TableCell>
-                  <TableCell className="amount">{p.total}</TableCell>
+                  <TableCell className="amount">{formatMoney(p.total)}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     <Badge variant={p.ivaCategory === 'UNCLASSIFIED' ? 'outline' : 'default'}>
                       {p.ivaCategory === 'CREDIT'
@@ -402,6 +407,8 @@ export function ReconciliationTable({
       <Button asChild>
         <Link href={`/${taxpayerId}/periods/${periodId}/pre-filing`}>{t('continueToPreDeclaration')}</Link>
       </Button>
+
+      {dialog}
 
       <Dialog open={detail !== null} onOpenChange={(open) => !open && setDetail(null)}>
         <DialogContent>
