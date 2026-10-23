@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import { getLocale } from 'next-intl/server';
-import { Schibsted_Grotesk } from 'next/font/google';
+import { IBM_Plex_Sans } from 'next/font/google';
 import './globals.css';
 
-const schibsted = Schibsted_Grotesk({
+const plex = IBM_Plex_Sans({
   subsets: ['latin'],
-  variable: '--font-schibsted',
+  variable: '--font-plex',
+  weight: ['400', '500', '600'],
   display: 'swap',
 });
 
@@ -20,7 +21,7 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale} className={schibsted.variable}>
+    <html lang={locale} className={plex.variable}>
       <body>{children}</body>
     </html>
   );

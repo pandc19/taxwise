@@ -20,7 +20,7 @@ export default async function PreFilingPage({
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold">{t('title')}</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t('title')}</h2>
       <PreFilingClient
         initialResults={results.map((r) => ({ key: r.resultKey, value: r.value.toString() }))}
         taxpayerId={taxpayerId}
