@@ -17,12 +17,12 @@ a new container — there's probably already one you can reuse.
 top of this foundation, confirm that **both** flags are active on every
 table holding taxpayer data — `ENABLE ROW LEVEL SECURITY` alone isn't
 enough if the app connects with the same role that owns the tables
-(which is the case here: `taxap` runs the migrations and also serves the
+(which is the case here: `taxwise_app` runs the migrations and also serves the
 queries). Without `FORCE`, Postgres exempts the owner from its own
 policies and queries silently return everything, unfiltered:
 
 ```bash
-docker exec postgres18 psql -U postgres -d taxap_dev -c "
+docker exec postgres18 psql -U postgres -d taxwise -c "
   SELECT relname, relrowsecurity, relforcerowsecurity
   FROM pg_class
   WHERE relname IN (
@@ -64,7 +64,7 @@ of a policy for a command blocks that command entirely for every row,
 rather than filtering it down to zero visible rows. This is deliberate: a
 taxpayer is never deleted from the application. If one needs to be deleted
 in development, it's done by hand with Postgres's superuser role (never
-with the `taxap` role).
+with the `taxwise_app` role).
 
 **Not even the superuser can delete a row from `classification_events`.**
 Unlike the above, this isn't RLS (which the superuser does bypass) — it's

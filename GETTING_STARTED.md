@@ -26,21 +26,21 @@ docker run -d \
   postgres:18-alpine
 ```
 
-Create the `taxap` user and the `taxap_dev` database:
+Create the `taxwise_app` user and the `taxwise` database:
 
 ```bash
-./scripts/setup-db.sh postgres18 taxap "taxap_dev_password"
+./scripts/setup-db.sh postgres18 taxwise_app "taxwise_dev_password"
 ```
 
 | Parameter | Value |
 |---|---|
 | Host | `localhost` |
 | Port | `5432` |
-| User | `taxap` |
-| Password | `taxap_dev_password` |
-| Database | `taxap_dev` |
+| User | `taxwise_app` |
+| Password | `taxwise_dev_password` |
+| Database | `taxwise` |
 
-> **The `taxap` user is not a superuser, and must never be.** PostgreSQL
+> **The `taxwise_app` user is not a superuser, and must never be.** PostgreSQL
 > superusers bypass Row-Level Security unconditionally, even with
 > `FORCE ROW LEVEL SECURITY`. A misconfigured deployment that uses the
 > `postgres` user silently disables all isolation between users.
@@ -49,12 +49,12 @@ Create the `taxap` user and the `taxap_dev` database:
 Verify that it isn't one:
 
 ```bash
-docker exec postgres18 psql -U taxap -d taxap_dev \
+docker exec postgres18 psql -U taxwise_app -d taxwise \
   -c "SELECT rolsuper FROM pg_roles WHERE rolname = current_user;"
 # must return: f
 ```
 
-The `taxap` role has `CREATEDB` permission (Prisma needs it for the shadow
+The `taxwise_app` role has `CREATEDB` permission (Prisma needs it for the shadow
 database during migrations) but is not a superuser.
 
 ## 2. Environment variables
@@ -72,7 +72,7 @@ openssl rand -base64 32
 `.env.local` ends up looking like this (not version-controlled):
 
 ```
-DATABASE_URL="postgresql://taxap:taxap_dev_password@localhost:5432/taxap_dev?schema=public"
+DATABASE_URL="postgresql://taxwise_app:taxwise_dev_password@localhost:5432/taxwise?schema=public"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="<the secret generated above>"
 ENCRYPTION_SECRET="<32 random bytes in base64, see below>"
@@ -170,10 +170,10 @@ Direct database access, if needed:
 
 ```bash
 # As the app's user
-PGPASSWORD="taxap_dev_password" psql -h localhost -U taxap -d taxap_dev
+PGPASSWORD="taxwise_dev_password" psql -h localhost -U taxwise_app -d taxwise
 
 # As superuser (for administrative tasks, never for the app)
-docker exec postgres18 psql -U postgres -d taxap_dev
+docker exec postgres18 psql -U postgres -d taxwise
 
 # Prisma Studio
 npx prisma studio
@@ -196,8 +196,8 @@ npm run db:reset
 Manual equivalent if needed:
 
 ```bash
-docker exec postgres18 psql -U postgres -c "DROP DATABASE taxap_dev;"
-./scripts/setup-db.sh postgres18 taxap "taxap_dev_password"
+docker exec postgres18 psql -U postgres -c "DROP DATABASE taxwise;"
+./scripts/setup-db.sh postgres18 taxwise_app "taxwise_dev_password"
 npm run db:migrate
 npm run db:seed
 ```

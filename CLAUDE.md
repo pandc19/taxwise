@@ -75,7 +75,7 @@ separate action. ([ADR-014](docs/adr/014-assistive-character-and-disclaimers.md)
 | Adding `attribution` (direct / proratable) | It was removed: a purchase's classification is `CREDIT` or `COST_EXPENSE` |
 | Splitting `IVA = 0` purchases by destination | They're just an informational total |
 | Rewriting an ADR after changing one's mind | A new one is written that replaces it |
-| Enabling RLS with only `ENABLE ROW LEVEL SECURITY` | It's not enough if the app connects with the same role that owns the tables (the case here: `taxap` runs the migrations and serves the queries). Postgres exempts the owner from its own policies unless `FORCE ROW LEVEL SECURITY` is also set. Without it, the policies exist but silently filter nothing ([ADR-004](docs/adr/004-per-user-rls-with-prisma.md)) |
+| Enabling RLS with only `ENABLE ROW LEVEL SECURITY` | It's not enough if the app connects with the same role that owns the tables (the case here: `taxwise_app` runs the migrations and serves the queries). Postgres exempts the owner from its own policies unless `FORCE ROW LEVEL SECURITY` is also set. Without it, the policies exist but silently filter nothing ([ADR-004](docs/adr/004-per-user-rls-with-prisma.md)) |
 
 ---
 

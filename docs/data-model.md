@@ -370,7 +370,7 @@ implemented.
 `supplier_profiles`, `shared_supplier_catalog`, `ai_usage`.
 
 Every table with RLS has both `ENABLE ROW LEVEL SECURITY` and
-`FORCE ROW LEVEL SECURITY` — the app connects as the same role (`taxap`)
+`FORCE ROW LEVEL SECURITY` — the app connects as the same role (`taxwise_app`)
 that owns the tables, and without `FORCE` Postgres exempts it from its
 own policies. See
 [`prisma/migrations/*_add_rls/`](../prisma/migrations/) and

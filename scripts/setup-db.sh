@@ -3,9 +3,9 @@
 # Usage: ./scripts/setup-db.sh [container-name] [username] [password]
 
 CONTAINER=${1:-postgres18}
-DB_USER=${2:-taxap}
+DB_USER=${2:-taxwise_app}
 DB_PASSWORD=${3:-$(openssl rand -base64 24)}
-DB_NAME="taxap_dev"
+DB_NAME="taxwise"
 
 echo "📦 Setting up PostgreSQL for Taxwise"
 echo "  Container:  $CONTAINER"

@@ -189,14 +189,14 @@ pass
 test_section "Database: RLS and Data Isolation"
 
 test_case "RLS is enabled on taxpayers table"
-if docker exec postgres18 psql -U taxap -d taxap_dev -c "\d taxpayers" | grep -q "rls"; then
+if docker exec postgres18 psql -U taxwise_app -d taxwise -c "\d taxpayers" | grep -q "rls"; then
   pass
 else
   fail "RLS not enabled"
 fi
 
 test_case "RLS policies exist for invoices_received"
-if docker exec postgres18 psql -U taxap -d taxap_dev -c "\dp invoices_received" | grep -q "SELECT"; then
+if docker exec postgres18 psql -U taxwise_app -d taxwise -c "\dp invoices_received" | grep -q "SELECT"; then
   pass
 else
   fail "No RLS policies"
