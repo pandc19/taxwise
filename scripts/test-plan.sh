@@ -1,11 +1,11 @@
 #!/bin/bash
-# Comprehensive test plan for taxap MVP.
+# Comprehensive test plan for Taxwise MVP.
 # Tests the complete data flow: parse → validate → classify → calculate.
 # Run this before deploying.
 
 set -e
 
-echo "🧪 taxap Test Plan"
+echo "🧪 Taxwise Test Plan"
 echo "=================="
 echo ""
 

@@ -1,10 +1,10 @@
-# taxap
+# Taxwise
 
 Tax-calculation assistant for Ecuador (SRI). Speeds up preparing the VAT
 filing from the voucher files that the taxpayer downloads from the SRI
 portal.
 
-> **taxap does not file tax returns or replace professional judgment.**
+> **Taxwise does not file tax returns or replace professional judgment.**
 > It produces calculation drafts that must be reviewed and validated by the
 > responsible party before being submitted to the SRI. See [ADR-014](docs/adr/014-assistive-character-and-disclaimers.md).
 

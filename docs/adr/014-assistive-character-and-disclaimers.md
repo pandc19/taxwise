@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-taxap calculates values that feed into a tax return. An incorrect filing
+Taxwise calculates values that feed into a tax return. An incorrect filing
 has real consequences — fines, interest, assessments — for the taxpayer,
 and the party responsible to the tax authority is always the taxpayer or
 their accountant, never the software.

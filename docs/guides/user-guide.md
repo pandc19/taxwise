@@ -1,11 +1,11 @@
-# Using taxap
+# Using Taxwise
 
-taxap helps you prepare your monthly IVA (VAT) numbers for the SRI. You give
+Taxwise helps you prepare your monthly IVA (VAT) numbers for the SRI. You give
 it the files you download from the SRI portal; it sorts your purchases,
 adds everything up, and shows you the totals to copy into the SRI portal
 yourself.
 
-> **taxap does not file anything with the SRI, and it is not an
+> **Taxwise does not file anything with the SRI, and it is not an
 > accountant.** It prepares a draft. You check it, and you do the filing
 > in the SRI portal. The screens are in Spanish; this guide shows the exact
 > Spanish labels in "quotes", with what they mean.
@@ -14,19 +14,19 @@ yourself.
 
 ## The idea in one minute
 
-1. You tell taxap **who you are and what you do** (once).
+1. You tell Taxwise **who you are and what you do** (once).
 2. Each month you **upload your SRI files**: the invoices you received
    (your purchases) and the ones you issued (your sales).
-3. taxap works out **which purchases are related to your work**, with a
+3. Taxwise works out **which purchases are related to your work**, with a
    little help from an AI service.
 4. You **check what it wasn't sure about**.
-5. taxap shows **the totals**. You copy them into the SRI portal.
+5. Taxwise shows **the totals**. You copy them into the SRI portal.
 
 ---
 
 ## Before you start
 
-- An account in taxap (register with an email and a password).
+- An account in Taxwise (register with an email and a password).
 - Your **RUC** and the activities registered on it.
 - Two files from the SRI portal for the month (tab-separated `.txt`):
   the **received** vouchers and the **issued** vouchers. If you only buy
@@ -41,13 +41,13 @@ Open "Inteligencia artificial" in the left menu.
 1. Choose where your key is from: **Anthropic (Claude)** or **OpenAI**.
 2. Paste your **API key**. It comes from your account with that provider;
    they charge you for what is asked (the cost for a month of typical use is
-   small, since each supplier is asked about only once), taxap charges nothing.
+   small, since each supplier is asked about only once), Taxwise charges nothing.
 3. Optionally choose two **models**. One *recognises suppliers* (a strong
    one works best, because it must know real companies; it is asked only
    once per supplier). The other is used for *everything else the AI does*
    (a cheaper one is fine). Under each field the screen tells you which
    default is used if you leave it empty.
-4. Press "Guardar la clave". taxap first checks with the provider that the
+4. Press "Guardar la clave". Taxwise first checks with the provider that the
    key and the models work, using requests that cost nothing.
 
 The key is stored encrypted and is never shown again, only its last four
@@ -60,7 +60,7 @@ characters. "Quitar la clave" removes it and turns the AI off.
 Go to "Mis contribuyentes" → "+ Nuevo contribuyente".
 
 **The basics:** RUC (13 digits), "Razón social" (your legal name), regime,
-and "Periodicidad". taxap only prepares **monthly** IVA for now; other
+and "Periodicidad". Taxwise only prepares **monthly** IVA for now; other
 frequencies can be registered but won't be calculated.
 
 **"Actividades económicas":** copy them from your RUC, code and
@@ -68,7 +68,7 @@ description. Add one row per activity.
 
 **"Tu trabajo" — the part that matters most.** The SRI files say who
 issued each invoice but not what you bought. To guess whether a purchase is
-for your work, taxap compares the supplier with what you tell it here. The
+for your work, Taxwise compares the supplier with what you tell it here. The
 more concrete, the better:
 
 | Field | What to put | Example |
@@ -79,10 +79,10 @@ more concrete, the better:
 | "IVA de las compras relacionadas con tu trabajo" | What happens to the IVA of purchases that are for your work: treat it as tax credit ("Considerarlo crédito tributario"), or as a cost or expense ("Tratarlo como costo o gasto"). | — |
 
 If a supplier sells something you ticked (for example an internet provider
-and you ticked "Internet"), taxap accepts it **without asking the AI**.
+and you ticked "Internet"), Taxwise accepts it **without asking the AI**.
 If you leave things unticked, it will not assume you buy them.
 
-**The IVA setting is your own tax decision.** taxap does not make it for
+**The IVA setting is your own tax decision.** Taxwise does not make it for
 you, and it can't tell you which one is better. Talk to an accountant if
 you are unsure; you can change it later (see "Changing your mind").
 
@@ -102,7 +102,7 @@ tabs at the top once you are inside.
 
 Upload one file at a time with "Cargar y validar".
 
-taxap checks every row: that the invoice belongs to you, that its date is
+Taxwise checks every row: that the invoice belongs to you, that its date is
 inside this month, and that nothing is duplicated. You see how many rows
 were valid and which had errors. Uploading the same file twice does no harm
 — invoices already loaded are skipped.
@@ -126,7 +126,7 @@ why there was no IVA. For each one, choose where it belongs:
 - "No objeto o exenta de IVA"
 
 Select one or several, choose the destination in "Marcar seleccionadas
-como", and confirm. Until every such sale is marked, taxap will not
+como", and confirm. Until every such sale is marked, Taxwise will not
 calculate the **factor of proportionality** (the share of your purchase IVA
 that can count as credit) — a number over unmarked sales would only look
 exact.
@@ -137,10 +137,10 @@ If you only export services, the factor will be `1.0000`.
 
 ## 5. Step 3 — "Conciliación" (your purchases)
 
-This is where taxap sorts your purchases. Only invoices **with IVA** are
+This is where Taxwise sorts your purchases. Only invoices **with IVA** are
 sorted; the rest are shown in a tab for information.
 
-Press **"Clasificar ahora"**. taxap groups the invoices by supplier and
+Press **"Clasificar ahora"**. Taxwise groups the invoices by supplier and
 decides each supplier in this order:
 
 1. **A rule you made** for that supplier.
@@ -180,7 +180,7 @@ invoices will wait for you.
 | "Con crédito tributario" | Related to your work; the IVA counts as credit. |
 | "Costo o gasto" | Related to your work; the IVA is a cost or expense, not credit. |
 | "No deducible" | Not related to your work (groceries, restaurants, entertainment…). |
-| "Pendientes" | taxap couldn't decide. **This is yours to review.** |
+| "Pendientes" | Taxwise couldn't decide. **This is yours to review.** |
 | "Sin IVA (informativo)" | Invoices with no IVA. Nothing to do. |
 
 Hover over a tab for a short explanation.
@@ -194,7 +194,7 @@ Each classified row shows **who decided it**:
 - **Regla** — a rule for the supplier.
 - **Manual** — you.
 
-Click the small **info icon** next to the classification to see what taxap
+Click the small **info icon** next to the classification to see what Taxwise
 knows about the supplier, and, if the AI answered, its confidence and its
 reasoning. For suppliers waiting on you, it says why.
 
@@ -221,7 +221,7 @@ Tick one or more rows, choose "Clasificar como" (Con crédito / Costo o gasto
 ### Your rules: "Proveedores"
 
 The store icon at the top of your taxpayer opens your supplier rules. You
-see each one, whether it is yours ("Manual") or an AI answer taxap
+see each one, whether it is yours ("Manual") or an AI answer Taxwise
 remembers ("IA"), and you can change it ("Relacionado con mi trabajo" /
 "No relacionado") or remove it with the trash icon. Changing or removing a
 rule **does not touch invoices already classified**; use "Reclasificar
@@ -246,7 +246,7 @@ The totals are calculated for you the first time you open this screen; press
 Purchases still in "Pendientes" are **not** in these totals — review them
 first.
 
-**Copy the values into the SRI portal yourself.** taxap does not know the
+**Copy the values into the SRI portal yourself.** Taxwise does not know the
 SRI form's boxes, so it names each total in plain words.
 
 When you have filed in the SRI, press **"Marcar como presentado en el
@@ -274,7 +274,7 @@ them first.
 
 ---
 
-## What taxap never does
+## What Taxwise never does
 
 - It never files or sends anything to the SRI.
 - It never sends your RUC or your name to the AI.
@@ -289,7 +289,7 @@ them first.
 |---|---|
 | Totals are all empty | Press "Recalcular". Nothing is counted until invoices are classified. |
 | "Factor … No calculado" | Some sale without IVA isn't marked yet — go to "Ventas emitidas". |
-| An invoice sits in "Pendientes" | taxap wasn't sure, or the supplier sells to both businesses and households. Decide it by hand. |
+| An invoice sits in "Pendientes" | Taxwise wasn't sure, or the supplier sells to both businesses and households. Decide it by hand. |
 | The AI says it doesn't recognise a supplier | It won't guess. Decide by hand, optionally with the rule checkbox. |
 | A wrong classification | Change it by hand. If many are wrong, check your "Tu trabajo" and press "Reclasificar todo". |
 | One invoice changed but the supplier's others didn't | By design: a manual decision applies only to the rows you ticked. Use the rule checkbox if you want it for the whole supplier. |
@@ -305,4 +305,4 @@ them first.
 | Factor de proporcionalidad | How much of your purchase IVA can count as credit, based on your sales. |
 | Período | One month. |
 | Comprobante | An invoice or similar document. |
-| Regla | A decision about a supplier that taxap reuses. |
+| Regla | A decision about a supplier that Taxwise reuses. |

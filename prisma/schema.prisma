@@ -1,4 +1,4 @@
-// Prisma schema for taxap.
+// Prisma schema for Taxwise.
 // Conventions (docs/data-model.md):
 //  - PKs: UUID, native uuidv7() (PostgreSQL 18+, no extension).
 //  - Money: DECIMAL(14,2), never float.

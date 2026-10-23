@@ -1,6 +1,6 @@
 # What the system calculates (monthly IVA)
 
-taxap turns a month's vouchers into a few totals and a proportionality
+Taxwise turns a month's vouchers into a few totals and a proportionality
 factor. It does not know the SRI form's fields: results carry a stable key
 and a plain-language name, and where each one is entered in the SRI portal
 is the user's own step ([ADR-016](../adr/016-results-not-mapped-to-form-fields.md)).

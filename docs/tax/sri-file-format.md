@@ -1,7 +1,7 @@
 # SRI file format
 
 Specification of the files the user downloads from the SRI portal and
-uploads to taxap. **Verified against real files on 2026-09-20.**
+uploads to Taxwise. **Verified against real files on 2026-09-20.**
 
 These are **tab-separated `.txt` files**, not CSV. The parser is
 configured with an explicit delimiter; autodetection is not used.

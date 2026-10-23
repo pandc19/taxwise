@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
 export const metadata: Metadata = {
-  title: 'taxap — Automatización de IVA',
+  title: 'Taxwise — Automatización de IVA',
   description:
     'Calcula los valores de tu declaración de IVA en minutos, no en días.',
 };

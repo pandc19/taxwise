@@ -15,7 +15,7 @@ Supabase solves authentication, file storage, and RLS tied to `auth.uid()`
 out of the box. Its distinguishing advantage is letting the browser query the
 database **directly**, with RLS as the only barrier.
 
-taxap's architecture is Server Actions and server-side rendering
+Taxwise's architecture is Server Actions and server-side rendering
 ([ADR-001](001-nextjs-monolith-with-domain-layer.md)): **no query ever
 leaves the browser.** They all go through the server, which has already
 authenticated the user.

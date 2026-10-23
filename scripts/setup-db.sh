@@ -7,7 +7,7 @@ DB_USER=${2:-taxap}
 DB_PASSWORD=${3:-$(openssl rand -base64 24)}
 DB_NAME="taxap_dev"
 
-echo "📦 Setting up PostgreSQL for taxap"
+echo "📦 Setting up PostgreSQL for Taxwise"
 echo "  Container:  $CONTAINER"
 echo "  User:       $DB_USER"
 echo "  Database:   $DB_NAME"

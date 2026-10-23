@@ -19,11 +19,11 @@ user could be told "enter this amount in field N".
 
 That machinery was never finished (the mapping was not computed) and it
 pulled the product toward something it should not be: a tool that knows
-which form cell each number belongs to. The people using taxap do not have
+which form cell each number belongs to. The people using Taxwise do not have
 an accountant to check that mapping, and a correct value next to the wrong
 field is the main risk ADR-015 itself identified.
 
-What users actually need from taxap is smaller: **know which purchases they
+What users actually need from Taxwise is smaller: **know which purchases they
 can consider for IVA credit.**
 
 ## Decision

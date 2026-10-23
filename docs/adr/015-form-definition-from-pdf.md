@@ -8,7 +8,7 @@ Superseded by [ADR-016](016-results-not-mapped-to-form-fields.md)
 
 ## Context
 
-taxap calculates values that the user then **enters** into the period's
+Taxwise calculates values that the user then **enters** into the period's
 Form 104, on the SRI portal. The form is the destination of those
 results, not a source for calculation.
 

@@ -1,7 +1,7 @@
 {
   "Common": {
     "authTagline": "Tu IVA del mes, calculado a partir de tus comprobantes.",
-    "appName": "taxap",
+    "appName": "Taxwise",
     "back": "Volver",
     "deleteConfirm": "¿Eliminar? No se puede deshacer.",
     "loading": "Cargando…",
@@ -290,7 +290,7 @@
   "Settings": {
     "title": "Inteligencia artificial",
     "intro": "La IA ayuda a clasificar tus compras: reconoce a los proveedores y dice si tienen que ver con tu trabajo. Todo lo demás funciona sin ella; sin IA, más comprobantes quedan esperando tu decisión.",
-    "ownKey": "Usa tu propia clave de API, de Anthropic o de OpenAI. El proveedor te cobra lo que se consulta; taxap no cobra nada por esto.",
+    "ownKey": "Usa tu propia clave de API, de Anthropic o de OpenAI. El proveedor te cobra lo que se consulta; Taxwise no cobra nada por esto.",
     "off": "La IA está apagada. Agrega tu clave abajo para encenderla.",
     "using": "Usando {provider}, clave que termina en {hint}.",
     "theDefault": "(por defecto)",

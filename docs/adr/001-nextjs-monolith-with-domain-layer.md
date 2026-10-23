@@ -19,7 +19,7 @@ There were three ways to structure this:
 BFF: the business logic lives in the `comprobify` API and the frontend just
 consumes it.
 
-taxap is the opposite. The tax engine **is** the product. The classification
+Taxwise is the opposite. The tax engine **is** the product. The classification
 logic, the proportionality factor, and the assembly of form fields are rules
 with many edge cases, where a bug doesn't produce a visible error — it
 produces an incorrect filing.
