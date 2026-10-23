@@ -9,7 +9,7 @@ export default async function RatesPage() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{t('tasasTitle')}</h2>
+        <h2 className="text-lg font-semibold">{t('tasasTitle')}</h2>
       </div>
       <RatesClient
         initialRates={rates.map((r) => ({

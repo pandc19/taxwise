@@ -17,7 +17,7 @@ export default async function ReconciliationPage({
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold">{t('title')}</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t('title')}</h2>
 
       <ReconciliationTable
         purchases={purchases.map((p) => ({

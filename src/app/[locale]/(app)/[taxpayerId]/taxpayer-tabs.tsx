@@ -13,7 +13,7 @@ export function TaxpayerTabs({ tabs }: { tabs: Tab[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="-mb-px flex gap-6 text-sm" aria-label="Contribuyente">
+    <nav className="-mb-px ml-auto flex gap-1 text-sm" aria-label="Contribuyente">
       {tabs.map((tab) => {
         const active = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
         return (
@@ -22,7 +22,7 @@ export function TaxpayerTabs({ tabs }: { tabs: Tab[] }) {
             href={tab.href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'border-b-2 py-3 transition-colors',
+              'border-b-2 px-3 py-2.5 transition-colors',
               active
                 ? 'border-primary font-semibold text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'

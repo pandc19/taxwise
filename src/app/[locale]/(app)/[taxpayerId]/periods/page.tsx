@@ -13,7 +13,7 @@ export default async function PeriodsPage({
   const periods = await getTaxpayerPeriods(taxpayerId);
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-4">
 
       <PeriodsClient
         taxpayerId={taxpayerId}

@@ -106,8 +106,8 @@ export function PeriodsClient({
   return (
     <div>
       {dialog}
-      <div className="mb-6 flex items-end justify-between gap-4">
-        <h1 className="text-3xl font-semibold">{t('title')}</h1>
+      <div className="mb-3 flex items-end justify-between gap-4">
+        <h1 className="text-xl font-semibold">{t('title')}</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>{t('newButton')}</Button>
@@ -157,22 +157,22 @@ export function PeriodsClient({
       </div>
 
       {periods.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-foreground/25 px-6 py-14 text-center text-muted-foreground">
+        <div className="rounded-md border border-dashed border-foreground/25 px-6 py-10 text-center text-muted-foreground">
           {t('emptyState')}
         </div>
       ) : (
-        <ul className="settle divide-y divide-border overflow-hidden rounded-lg border bg-card">
+        <ul className="settle divide-y divide-border overflow-hidden rounded-md border bg-card">
           {periods.map((period) => {
             const date = new Date(period.periodStart);
             const monthNum = date.getUTCMonth() + 1;
             return (
               <li key={period.id}>
-                <div className="group relative flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-accent/60">
+                <div className="group relative flex items-center gap-3 px-4 py-2 transition-colors hover:bg-accent/60">
                   <Link
                     href={`/${taxpayerId}/periods/${period.id}`}
                     className="flex min-w-0 flex-1 items-baseline gap-2 after:absolute after:inset-0"
                   >
-                    <span className="text-base font-semibold">{t(`months.${monthNum}`)}</span>
+                    <span className="font-semibold">{t(`months.${monthNum}`)}</span>
                     <span className="text-muted-foreground tabular-nums">{date.getUTCFullYear()}</span>
                   </Link>
                   <div className="relative z-10 flex shrink-0 items-center gap-2">
@@ -183,7 +183,7 @@ export function PeriodsClient({
                         value={period.status}
                         onValueChange={(status) => handleStatusChange(period.id, status)}
                       >
-                        <SelectTrigger className="h-8 w-36">
+                        <SelectTrigger className="w-36">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -208,7 +208,7 @@ export function PeriodsClient({
                   </div>
                 </div>
                 {rowErrors[period.id] && (
-                  <div className="px-5 pb-3">
+                  <div className="px-4 pb-2">
                     <Alert variant="destructive">
                       <AlertDescription>{rowErrors[period.id]}</AlertDescription>
                     </Alert>

@@ -175,7 +175,7 @@ export function ReconciliationTable({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {aiError && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -205,7 +205,7 @@ export function ReconciliationTable({
         </div>
       )}
 
-      <div role="tablist" className="flex flex-wrap gap-2">
+      <div role="tablist" className="flex flex-wrap gap-x-1 border-b">
         {(
           [
             ['UNCLASSIFIED', t('tabUnclassified'), unclassified.length, t('tabUnclassifiedHint')],
@@ -223,10 +223,10 @@ export function ReconciliationTable({
             aria-selected={tab === key}
             title={hint}
             onClick={() => setTab(key)}
-            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
+            className={`-mb-px flex items-center gap-2 border-b-2 px-3 py-2 text-sm transition-colors ${
               tab === key
-                ? 'border-primary bg-primary font-medium text-primary-foreground'
-                : 'bg-card text-foreground/80 hover:bg-accent hover:text-foreground'
+                ? 'border-primary font-semibold text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             {label}
@@ -235,8 +235,8 @@ export function ReconciliationTable({
                 key === 'PENDING' && count > 0
                   ? 'bg-signal text-signal-foreground'
                   : tab === key
-                    ? 'bg-white/20 text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground'
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-secondary text-muted-foreground'
               }`}
             >
               {count}
@@ -255,7 +255,7 @@ export function ReconciliationTable({
           {noVat.length === 0 ? (
             <p className="py-6 text-center text-muted-foreground">{t('emptyState')}</p>
           ) : (
-            <div className="overflow-hidden rounded-lg border bg-card">
+            <div className="overflow-hidden rounded-md border bg-card">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -295,14 +295,14 @@ export function ReconciliationTable({
       )}
 
       {visible.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-foreground/25 py-10 text-center text-muted-foreground">
+        <p className="rounded-md border border-dashed border-foreground/25 py-10 text-center text-muted-foreground">
           {tab === 'UNCLASSIFIED' && purchases.length > 0 && pending.length + withCredit.length + costExpense.length + nonDeductible.length === 0
             ? t('nothingClassifiedYet')
             : t('emptyState')}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-lg border bg-card">
-          <div className="flex flex-wrap items-center gap-3 border-b bg-secondary/60 px-4 py-3">
+        <div className="overflow-hidden rounded-md border bg-card">
+          <div className="flex flex-wrap items-center gap-3 border-b bg-accent/40 px-3 py-2">
             <Checkbox
               checked={selected.size === visible.length && visible.length > 0}
               onCheckedChange={(checked) =>
@@ -342,7 +342,7 @@ export function ReconciliationTable({
             </Button>
           </div>
 
-          <Table>
+          <Table containerClassName="sticky-head max-h-[calc(100vh-17rem)] overflow-auto">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-10" />

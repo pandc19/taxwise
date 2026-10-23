@@ -8,8 +8,8 @@ export default async function AiSettingsPage() {
   const { canStore, saved } = await getAiSettings();
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="mb-3 text-3xl font-semibold">{t('title')}</h1>
+    <div className="mx-auto max-w-2xl px-4 py-6">
+      <h1 className="mb-2 text-xl font-semibold">{t('title')}</h1>
       <p className="mb-2 text-sm text-muted-foreground">{t('intro')}</p>
       <p className="mb-6 text-sm text-muted-foreground">{t('ownKey')}</p>
 

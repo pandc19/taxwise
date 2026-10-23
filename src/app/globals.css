@@ -21,10 +21,13 @@
   --color-destructive: var(--destructive);
   --color-signal: var(--signal);
   --color-signal-foreground: var(--signal-foreground);
+  --color-success: var(--success);
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9286rem;
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-muted: var(--sidebar-muted);
-  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -35,66 +38,73 @@
 }
 
 :root {
-  /* Libro mayor: green columnar ledger paper, ink, one saffron signal. */
-  --radius: 0.375rem;
-  --background: oklch(0.955 0.008 150);
-  --foreground: oklch(0.22 0.02 165);
-  --card: oklch(0.985 0.004 150);
-  --card-foreground: oklch(0.22 0.02 165);
-  --popover: oklch(0.985 0.004 150);
-  --popover-foreground: oklch(0.22 0.02 165);
-  --primary: oklch(0.38 0.07 167);
-  --primary-foreground: oklch(0.985 0.004 150);
-  --secondary: oklch(0.925 0.012 150);
-  --secondary-foreground: oklch(0.28 0.04 165);
-  --muted: oklch(0.935 0.01 150);
-  --muted-foreground: oklch(0.48 0.025 160);
-  --accent: oklch(0.92 0.02 160);
-  --accent-foreground: oklch(0.28 0.05 165);
-  --destructive: oklch(0.5 0.17 32);
-  --border: oklch(0.87 0.015 150);
-  --input: oklch(0.82 0.02 150);
-  --ring: oklch(0.55 0.1 167);
-  --signal: oklch(0.78 0.15 85);
-  --signal-foreground: oklch(0.3 0.06 85);
-  --sidebar: oklch(0.255 0.045 168);
-  --sidebar-foreground: oklch(0.93 0.015 150);
-  --sidebar-muted: oklch(0.72 0.03 160);
+  /* Mesa de trabajo: cool grey canvas, flat white worksheets, ink-blue
+     accent. Amber (signal) is reserved for "needs your attention". */
+  --radius: 0.25rem;
+  --background: oklch(0.962 0.004 260);
+  --foreground: oklch(0.24 0.03 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.03 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.03 262);
+  --primary: oklch(0.45 0.16 266);
+  --primary-foreground: oklch(0.985 0.004 260);
+  --secondary: oklch(0.94 0.006 260);
+  --secondary-foreground: oklch(0.32 0.04 262);
+  --muted: oklch(0.95 0.005 260);
+  --muted-foreground: oklch(0.5 0.025 260);
+  --accent: oklch(0.945 0.02 266);
+  --accent-foreground: oklch(0.32 0.1 266);
+  --destructive: oklch(0.52 0.19 27);
+  --border: oklch(0.9 0.008 260);
+  --input: oklch(0.82 0.012 260);
+  --ring: oklch(0.55 0.15 266);
+  --signal: oklch(0.88 0.12 90);
+  --signal-foreground: oklch(0.38 0.08 70);
+  --success: oklch(0.5 0.12 155);
+  --sidebar: oklch(0.24 0.035 264);
+  --sidebar-foreground: oklch(0.95 0.008 260);
+  --sidebar-muted: oklch(0.75 0.02 260);
 }
 
 .dark {
-  --background: oklch(0.2 0.02 165);
-  --foreground: oklch(0.94 0.012 150);
-  --card: oklch(0.245 0.025 165);
-  --card-foreground: oklch(0.94 0.012 150);
-  --popover: oklch(0.245 0.025 165);
-  --popover-foreground: oklch(0.94 0.012 150);
-  --primary: oklch(0.72 0.1 167);
-  --primary-foreground: oklch(0.2 0.03 165);
-  --secondary: oklch(0.3 0.03 165);
-  --secondary-foreground: oklch(0.94 0.012 150);
-  --muted: oklch(0.28 0.025 165);
-  --muted-foreground: oklch(0.72 0.025 160);
-  --accent: oklch(0.32 0.04 165);
-  --accent-foreground: oklch(0.94 0.012 150);
-  --destructive: oklch(0.7 0.16 30);
+  --background: oklch(0.2 0.02 262);
+  --foreground: oklch(0.94 0.008 260);
+  --card: oklch(0.245 0.02 262);
+  --card-foreground: oklch(0.94 0.008 260);
+  --popover: oklch(0.245 0.02 262);
+  --popover-foreground: oklch(0.94 0.008 260);
+  --primary: oklch(0.72 0.12 266);
+  --primary-foreground: oklch(0.2 0.03 262);
+  --secondary: oklch(0.3 0.02 262);
+  --secondary-foreground: oklch(0.94 0.008 260);
+  --muted: oklch(0.28 0.02 262);
+  --muted-foreground: oklch(0.72 0.02 260);
+  --accent: oklch(0.32 0.04 266);
+  --accent-foreground: oklch(0.94 0.008 260);
+  --destructive: oklch(0.7 0.16 27);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 18%);
-  --ring: oklch(0.7 0.1 167);
-  --signal: oklch(0.8 0.15 85);
-  --signal-foreground: oklch(0.25 0.05 85);
-  --sidebar: oklch(0.17 0.03 168);
-  --sidebar-foreground: oklch(0.93 0.015 150);
-  --sidebar-muted: oklch(0.7 0.03 160);
+  --ring: oklch(0.7 0.12 266);
+  --signal: oklch(0.8 0.13 90);
+  --signal-foreground: oklch(0.25 0.05 80);
+  --success: oklch(0.72 0.12 155);
+  --sidebar: oklch(0.17 0.025 264);
+  --sidebar-foreground: oklch(0.95 0.008 260);
+  --sidebar-muted: oklch(0.72 0.02 260);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  /* A dense tool: the whole rem scale runs a step below the browser default. */
+  html {
+    font-size: 14px;
+  }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'tnum' 1, 'cv11' 1;
+    font-feature-settings: 'tnum' 1;
   }
   h1, h2, h3 {
     letter-spacing: -0.015em;
@@ -111,6 +121,13 @@
   /* The accountant's closing mark: a double rule under a final figure. */
   .double-rule {
     border-bottom: 3px double var(--foreground);
+  }
+  /* Table headers stay put while a long list scrolls under them. */
+  .sticky-head thead th {
+    position: sticky;
+    top: var(--sticky-top, 0px);
+    z-index: 1;
+    background: var(--secondary);
   }
   /* Dotted leader between a ledger line's label and its amount. */
   .leader {

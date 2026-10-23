@@ -56,13 +56,13 @@ export function IngestionClient() {
 
   return (
     <div>
-      <Card className="mb-6">
+      <Card className="mb-3">
         <CardHeader>
           <CardTitle>{t('uploadHeading')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
-            className="h-auto border-dashed border-foreground/30 bg-transparent py-6 file:mr-4 file:h-8 file:rounded-md file:bg-secondary file:px-3 file:py-1.5"
+            className="h-auto border-dashed border-foreground/30 bg-transparent py-5 file:mr-4 file:h-6 file:rounded-md file:bg-secondary file:px-3 file:py-1.5"
             key={inputKey}
             type="file"
             accept=".txt"
@@ -81,7 +81,7 @@ export function IngestionClient() {
       </Card>
 
       {error && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-3">
           <AlertTriangle className="size-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -89,7 +89,7 @@ export function IngestionClient() {
 
       {result?.success && (
         <>
-          <Card className="mb-6">
+          <Card className="mb-3">
             <CardHeader>
               <CardTitle>{t('resultHeading')}</CardTitle>
               <CardDescription>
@@ -98,26 +98,26 @@ export function IngestionClient() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-center sm:grid-cols-4 [&>div]:tabular-nums">
               <div>
-                <div className="text-3xl font-semibold">{result.totalRows}</div>
+                <div className="text-xl font-semibold">{result.totalRows}</div>
                 <div className="text-sm text-muted-foreground">{t('totalRows')}</div>
               </div>
               <div>
-                <div className="text-3xl font-semibold text-primary">{result.validCount}</div>
+                <div className="text-xl font-semibold text-primary">{result.validCount}</div>
                 <div className="text-sm text-muted-foreground">{t('valid')}</div>
               </div>
               <div>
-                <div className="text-3xl font-semibold text-muted-foreground">{result.duplicateCount}</div>
+                <div className="text-xl font-semibold text-muted-foreground">{result.duplicateCount}</div>
                 <div className="text-sm text-muted-foreground">{t('alreadyLoaded')}</div>
               </div>
               <div>
-                <div className="text-3xl font-semibold text-destructive">{result.errorCount}</div>
+                <div className="text-xl font-semibold text-destructive">{result.errorCount}</div>
                 <div className="text-sm text-muted-foreground">{t('errors')}</div>
               </div>
             </CardContent>
           </Card>
 
           {(result.errorCount ?? 0) > 0 && (
-            <Card className="mb-6">
+            <Card className="mb-3">
               <CardHeader>
                 <CardTitle>{t('errorsHeading')}</CardTitle>
               </CardHeader>

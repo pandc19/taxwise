@@ -31,12 +31,12 @@ export default async function IngestionPage({
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold">{t('title')}</h2>
+      <h2 className="mb-3 text-lg font-semibold">{t('title')}</h2>
 
       <IngestionClient />
 
       {received.length + issued.length > 0 && (
-        <Alert className="mb-6 border-l-4 border-l-primary">
+        <Alert className="mb-3 border-l-4 border-l-primary">
           <CheckCircle2 className="size-4 text-primary" />
           <AlertDescription className="flex items-center justify-between">
             <span>{t('readyMessage', { count: received.length + issued.length })}</span>
@@ -47,15 +47,15 @@ export default async function IngestionPage({
         </Alert>
       )}
 
-      <h3 className="mb-3 mt-10 text-lg font-semibold">{t('loadedHeading')}</h3>
+      <h3 className="mb-2 mt-6 text-base font-semibold">{t('loadedHeading')}</h3>
 
       {files.length === 0 ? (
         <p className="text-muted-foreground">{t('loadedEmpty')}</p>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-3">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t('filesHeading')}</CardTitle>
+              <CardTitle className="text-sm">{t('filesHeading')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -101,11 +101,11 @@ export default async function IngestionPage({
           {received.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">{t('receivedHeading')}</CardTitle>
+                <CardTitle className="text-sm">{t('receivedHeading')}</CardTitle>
                 <CardDescription>{t('vouchersCount', { count: received.length })}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
+                <Table containerClassName="sticky-head max-h-96 overflow-auto">
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t('date')}</TableHead>
@@ -139,11 +139,11 @@ export default async function IngestionPage({
           {issued.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">{t('issuedHeading')}</CardTitle>
+                <CardTitle className="text-sm">{t('issuedHeading')}</CardTitle>
                 <CardDescription>{t('vouchersCount', { count: issued.length })}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
+                <Table containerClassName="sticky-head max-h-96 overflow-auto">
                   <TableHeader>
                     <TableRow>
                       <TableHead>{t('date')}</TableHead>

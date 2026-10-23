@@ -10,9 +10,9 @@ export default async function TaxpayersPage() {
   const taxpayers = await getMyTaxpayers();
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-3xl font-semibold">{t('title')}</h1>
+    <div className="mx-auto max-w-7xl px-4 py-4">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-4">
+        <h1 className="text-xl font-semibold">{t('title')}</h1>
         {taxpayers.length > 0 && (
           <Button asChild>
             <Link href="/taxpayers/new">{t('newButton')}</Link>
@@ -21,24 +21,24 @@ export default async function TaxpayersPage() {
       </div>
 
       {taxpayers.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-foreground/25 px-6 py-16 text-center">
+        <div className="rounded-md border border-dashed border-foreground/25 px-6 py-12 text-center">
           <p className="mx-auto mb-5 max-w-sm text-muted-foreground">{t('emptyState')}</p>
           <Button asChild>
             <Link href="/taxpayers/new">{t('emptyStateCta')}</Link>
           </Button>
         </div>
       ) : (
-        <ul className="settle divide-y divide-border overflow-hidden rounded-lg border bg-card">
+        <ul className="settle divide-y divide-border overflow-hidden rounded-md border bg-card">
           {taxpayers.map((taxpayer) => (
-            <li key={taxpayer.id} className="group relative flex items-center gap-4 px-5 py-4 transition-colors hover:bg-accent/60">
+            <li key={taxpayer.id} className="group relative flex items-center gap-4 px-4 py-2.5 transition-colors hover:bg-accent/60">
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/${taxpayer.id}/periods`}
-                  className="block truncate text-base font-semibold after:absolute after:inset-0"
+                  className="block truncate font-semibold after:absolute after:inset-0"
                 >
                   {taxpayer.businessName}
                 </Link>
-                <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
+                <p className="text-sm text-muted-foreground tabular-nums">
                   {t('ruc')} {taxpayer.ruc}
                 </p>
               </div>

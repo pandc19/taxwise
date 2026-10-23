@@ -12,9 +12,9 @@ export default async function SuppliersPage({
   const rules = await getSupplierRules(taxpayerId);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      <h2 className="mb-2 text-3xl font-semibold">{t('title')}</h2>
-      <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t('intro')}</p>
+    <div className="mx-auto max-w-7xl px-4 py-4">
+      <h2 className="mb-1 text-xl font-semibold">{t('title')}</h2>
+      <p className="mb-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t('intro')}</p>
       <SuppliersClient taxpayerId={taxpayerId} rules={rules} />
     </div>
   );

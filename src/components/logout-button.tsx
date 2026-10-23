@@ -7,6 +7,7 @@ export function LogoutButton({ label, className }: { label: string; className?: 
   return (
     <Button
       variant="ghost"
+      size="sm"
       className={`border border-white/20 text-sidebar-foreground hover:bg-white/10 hover:text-sidebar-foreground dark:hover:bg-white/10 ${className ?? ''}`} onClick={() => signOut({ callbackUrl: '/login' })}>
       {label}
     </Button>

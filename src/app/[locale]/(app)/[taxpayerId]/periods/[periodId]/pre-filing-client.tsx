@@ -20,10 +20,10 @@ const fmt = (v?: string) => (v === undefined ? v : formatMoney(v));
 function Line({ label, value, closing = false }: { label: string; value?: string; closing?: boolean }) {
   if (value === undefined) return null;
   return (
-    <div className="flex items-end gap-3 py-1.5 text-sm">
+    <div className="flex items-end gap-3 py-1 text-sm">
       <span className={closing ? 'font-semibold' : undefined}>{label}</span>
       <span className="leader" aria-hidden />
-      <span className={`amount pb-0.5 text-base ${closing ? 'double-rule font-semibold' : 'font-medium'}`}>
+      <span className={`amount pb-0.5 ${closing ? 'double-rule font-semibold' : 'font-medium'}`}>
         {value}
       </span>
     </div>
@@ -32,8 +32,8 @@ function Line({ label, value, closing = false }: { label: string; value?: string
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border bg-card px-6 py-5">
-      <h2 className="mb-2 border-b border-foreground/30 pb-2 text-lg font-semibold">{title}</h2>
+    <section className="rounded-md border bg-card px-4 py-3">
+      <h2 className="mb-1 border-b border-foreground/30 pb-1.5 text-base font-semibold">{title}</h2>
       {children}
     </section>
   );
@@ -100,7 +100,7 @@ export function PreFilingClient({
   const byKey = new Map(initialResults.map((r) => [r.key, r.value]));
 
   return (
-    <div className="space-y-5">
+    <div className="max-w-3xl space-y-3">
       <div className="flex items-center justify-between gap-3">
         <Badge variant={isFiled ? 'default' : 'secondary'}>
           {isFiled ? t('filedBadge') : t('draftBadge')}
@@ -134,7 +134,7 @@ export function PreFilingClient({
         )}
       </Section>
 
-      <div className="pt-2">
+      <div className="pt-1">
         {!isFiled ? (
           <Button onClick={markFiled} disabled={isPending}>
             {t('lockPeriod')}
